@@ -1,5 +1,5 @@
 # Doodle_Project
-//Add Description here#
+
 
 This is our recreation of the tool Doodle, which helps you set appointments with a voting system. 
 
