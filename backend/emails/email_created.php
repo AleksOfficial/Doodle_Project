@@ -121,11 +121,11 @@
     }
     
     .button--green {
-      background-color: #FFC312;
-      border-top: 10px solid #FFC312;
-      border-right: 18px solid #FFC312;
-      border-bottom: 10px solid #FFC312;
-      border-left: 18px solid #FFC312;
+      background-color: #68D511;
+      border-top: 10px solid #68D511;
+      border-right: 18px solid #68D511;
+      border-bottom: 10px solid #68D511;
+      border-left: 18px solid #68D511;
     }
     
     .button--red {
@@ -439,7 +439,7 @@
           <table class="email-content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
               <td class="email-masthead">
-                <a href="localhost/webtech/webdev_project/index.php class="f-fallback email-masthead_name">
+                <a href="localhost/webtech/webdev_project/index.php" class="f-fallback email-masthead_name">
                 RIFT
               </a>
               </td>
@@ -452,8 +452,9 @@
                   <tr>
                     <td class="content-cell">
                       <div class="f-fallback">
-                        <h1>Hi {{name}},</h1>
-                        <p>You recently requested to reset your password for your [Product Name] account. Use the button below to reset it. <strong>This password reset is only valid for the next 24 hours.</strong></p>
+                        <h1>Woohoo 🥳</h1>
+                        <p>You created an appointment poll - Title: <strong>{{title}}</strong><br><br>In case you lost your link or didn't vote yet, the button below will navigate you back to your poll 🗳️. </p>
+                        
                         <!-- Action -->
                         <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                           <tr>
@@ -463,16 +464,17 @@
                               <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
                                 <tr>
                                   <td align="center">
-                                    <a href="{{action_url}}" class="f-fallback button button--green" target="_blank">Reset your password</a>
+                                   
+                                    👉 <a href="{{action_url}}" class="f-fallback button button--green" target="_blank">Navigate to Poll</a> 👈 
                                   </td>
                                 </tr>
                               </table>
                             </td>
                           </tr>
                         </table>
-                        <p>If you did not request a password reset, please ignore this email.</p>
-                        <p>Thanks,
-                          <br>The RIFT Team</p>
+                        <p>The Poll ends on <strong>{{a_end_date}}</strong> .</p>
+                        <p>Thank you for using our tools, you are aweosome!
+                          <br>- The Doodle clone team</p>
                         <!-- Sub copy -->
                         <table class="body-sub" role="presentation">
                           <tr>
@@ -493,11 +495,7 @@
                 <table class="email-footer" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
                   <tr>
                     <td class="content-cell" align="center">
-                      <p class="f-fallback sub align-center">&copy; 2021 RIFT. All rights reserved.</p>
-                      <p class="f-fallback sub align-center">
-                        [RIFT Social Media, GmbH]
-                        <br>Höchstädtplatz 6.
-                        <br>Wien, 1200
+                      <p class="f-fallback sub align-center">Add some information here? .</p>
                       </p>
                     </td>
                   </tr>
