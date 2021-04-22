@@ -2,6 +2,9 @@ var collectedData = {
     name: "",
     location: "",
     description: "",
+    creatorName: "",
+    creatorEmail: "",
+    validUntil: null,
     dates: []
 };
 var divs = [];
@@ -109,6 +112,7 @@ function addTimeSlot(e) {
         finishButton.classList.remove("button-unclickable");
         finishButton.classList.add("button-clickable");
     }
+    alert(startDate < endDate);
     addPlusSign();
 }
 var addTimeSlotListener = function (e) { addTimeSlot(e); };

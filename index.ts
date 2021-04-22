@@ -7,6 +7,9 @@ interface AppointmentData {
     name: string;
     location: string;
     description: string;
+    creatorName: string;
+    creatorEmail: string;
+    validUntil: Date;
     dates: AppointmentDate[];
 }
 
@@ -14,6 +17,9 @@ var collectedData: AppointmentData = {
     name: "",
     location: "",
     description: "",
+    creatorName: "",
+    creatorEmail: "",
+    validUntil: null,
     dates: []
 }
 var divs: HTMLDivElement[] = [];
@@ -123,6 +129,7 @@ function addTimeSlot(e: Event) {
         finishButton.classList.remove("button-unclickable");
         finishButton.classList.add("button-clickable");
     }
+    alert(startDate < endDate);
     addPlusSign();
 }
 var addTimeSlotListener = (e: Event) => {addTimeSlot(e)};
