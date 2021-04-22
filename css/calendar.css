@@ -1,0 +1,52 @@
+.calendar-bottom-buttons .button-back {
+  float: left;
+}
+
+.calendar-bottom-buttons .button-forward {
+  float: right;
+}
+
+.calendar-header-tags {
+  padding-top: 20px;
+  color: rgb(109, 109, 109);
+  display: flex;
+  justify-content: space-around;
+}
+
+.calendar-content-main {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 400px;
+  padding-top: 20px;
+  align-items: flex-start;
+}
+
+.calendar-content {
+  padding-bottom: 30px;
+}
+
+.timeslot {
+  margin: 20px;
+}
+
+.timeslot-input {
+  background-color: rgb(187, 187, 187);
+  border-radius: 5px;
+  padding: 20px;
+}
+
+.timeslot-input input,
+.timeslot-input button {
+  margin: 10px;
+}
+
+select {
+  font-size: 1.5em;
+  margin: 10px;
+}
+
+.timeslot-finished {
+  background-color: rgb(112, 255, 77);
+  border-radius: 5px;
+  padding: 20px;
+}

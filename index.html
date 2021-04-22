@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>
+            Appointment Finder
+        </title>
+        <link rel="stylesheet" type="text/css" href="css/main.css" />
+        <meta charset="UTF-8" />
+    </head>
+    <body>
+        <div class="main-box fade-in">
+            <div class="create-new-appointment-content">
+                <h1>Create New Appointment</h1>
+                <div class="create-appointment-form">
+                    <input type="text" onchange="" /><br />
+                    <button class="button-unclickable">Create</button>
+                </div>
+            </div>
+            <div class="options-content fade-in hide">
+                <header>
+                    <h1>Options</h1>
+                </header>
+                <div class="options-content-main">
+                    Name: <br />
+                    <input type="text" name="name" /><br /><br />
+                    Location:<br />
+                    <input type="text" name="location" /><br /><br />
+                    Description:<br />
+                    <input type="text" name="description" />
+                    <br /><br /><br />
+                    <button class="button-unclickable">Continue</button>
+                </div>
+            </div>
+            <div class="calendar-content fade-in hide">
+                <header>
+                    <h1>Dates</h1>
+                    <div class="calendar-header-tags">
+                        <div class="calendar-header-name">Name: </div>
+                        <div class="calendar-header-location">Location: </div>
+                        <div class="calendar-header-description">Description: </div>
+                    </div>
+                </header>
+                <div class="calendar-content-main">
+                
+                </div>
+                <div class="calendar-bottom-buttons">
+                    <button class="button-clickable button-back">Back</button>
+                    <button class="button-unclickable button-forward">Finish</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="index.js">
+
+        </script>
+    </body>
+</html>

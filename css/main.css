@@ -1,0 +1,84 @@
+@import url("https://fonts.googleapis.com/css2?family=Antonio:wght@100&display=swap");
+@import url("button.css");
+@import url("animations.css");
+@import url("createNewAppointment.css");
+@import url("options.css");
+@import url("calendar.css");
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.hide {
+  display: none;
+}
+
+body {
+  font-family: Antonio;
+}
+
+body {
+  background-color: rgb(112, 255, 77);
+}
+
+input {
+  outline: none;
+  border-radius: 5px;
+  height: 2em;
+  font-size: 1.5em;
+}
+
+.main-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 10px;
+  height: 300px;
+  margin: 20px;
+  transition: all 1s;
+}
+
+.main-box-large {
+  display: block;
+  padding: 20px;
+  height: auto;
+}
+
+.main-box-full {
+  display: block;
+  padding: 20px;
+  height: auto;
+}
+
+header {
+  text-align: center;
+}
+
+@media (min-width: 800px) {
+  .main-box {
+    position: absolute;
+    width: 600px;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    margin-top: -150px;
+    margin-left: -300px;
+    border-radius: 20px;
+  }
+
+  .main-box-large {
+    width: 800px;
+    margin-top: -300px;
+    margin-left: -400px;
+  }
+
+  .main-box-full {
+    width: 90%;
+    margin: 30px 5%;
+    top: 0;
+    left: 0;
+  }
+}

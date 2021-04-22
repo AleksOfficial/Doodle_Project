@@ -1,0 +1,19 @@
+.create-new-appointment-content {
+  text-align: center;
+}
+
+.create-new-appointment-content h1 {
+  width: 100%;
+  padding-bottom: 30px;
+  font-size: 2.5em;
+}
+
+.create-new-appointment-content button {
+  width: 60%;
+  margin-top: 20px;
+}
+
+.create-new-appointment-content input {
+  width: 100%;
+  text-align: center;
+}

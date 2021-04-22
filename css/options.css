@@ -1,0 +1,16 @@
+.options {
+  width: 100%;
+}
+
+.options-content header {
+  text-align: center;
+}
+
+.options-content input {
+  width: 100%;
+}
+
+.options-content-main {
+  width: 90%;
+  margin: 5%;
+}
