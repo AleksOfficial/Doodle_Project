@@ -21,5 +21,3 @@
   //$sender->generate_mail("hello_world","invite","bob");
 
   //Send them
-
-?>
