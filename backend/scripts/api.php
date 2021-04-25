@@ -25,27 +25,38 @@ function getData($baselink)
     return $data;*/
 }
 
-function response($data)
+function responsePullAppointment($data)
 {
     if ($data != null) {
         http_response_code(200);
         echo json_encode($data);
     } else {
         http_response_code(400);
-        echo "Error with AJAX request: Wrong method name or nonnumeric parameter given.";
+        echo "Error: Event not found!";
+    }
+}
+
+function responsePushAppointment($data)
+{
+    if ($data != null) {
+        http_response_code(200);
+        echo json_encode($data);
+    } else {
+        http_response_code(400);
+        echo "Error: Event could not be saved!";
     }
 }
 
 if (isset($_GET['baselink'])) {
-    response(getData($_GET['baselink']));
+    responsePullAppointment(getData($_GET['baselink']));
 } else {
-    response(null);
+    responsePullAppointment(null);
 }
 
 /*
 if (isset($_POST['a_title'])) {
     $database = new Db_set_appointment($_POST);
-    $response = $database->getHashes();
-    $this->response($response);
+    $response = $database->getHash();
+    $this->responsePushAppointment($response);
 }
 */
