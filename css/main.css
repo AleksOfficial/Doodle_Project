@@ -4,6 +4,9 @@
 @import url("createNewAppointment.css");
 @import url("options.css");
 @import url("calendar.css");
+@import url("creator.css");
+@import url("loading.css");
+@import url("appointment.css");
 
 * {
   box-sizing: border-box;

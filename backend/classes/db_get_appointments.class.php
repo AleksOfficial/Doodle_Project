@@ -5,7 +5,7 @@ class Db_get_appointments extends Db_con
 
     function __construct()
     {
-        $pdo = $this->connect();
+        $this->pdo = $this->connect();
     }
 
     function get_appointment($baseLink)
@@ -22,15 +22,13 @@ class Db_get_appointments extends Db_con
         if ($x) {
             //Return all entries with Timeslots, then at the position timeslots of
             $appointment = $stmt->fetch();
-            if(!$appointment){
+            if (!$appointment) {
                 //$this->error("Error: Appointment not found in the Database");
                 return NULL;
-            }  
+            }
             $appointment["timeslots"] = $this->get_timeslots_to_appointment($appointment['p_e_id']);
             return $appointment;
-
-        }
-        else {
+        } else {
             $this->error($stmt->errorInfo()[2]);
             return NULL;
         }
@@ -40,14 +38,11 @@ class Db_get_appointments extends Db_con
         $query = "SELECT * from t_timeslots WHERE f_e_id = ?";
         $stmt = $this->pdo->prepare($query);
         $x = $stmt->execute([$e_id]);
-        if($x)
+        if ($x)
             return $stmt->fetchAll();
-        else
-        {
+        else {
             $this->error($stmt->errorInfo()[2]);
             return NULL;
         }
     }
-
-
 }

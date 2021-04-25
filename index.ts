@@ -7,7 +7,7 @@ interface AppointmentData {
     a_title: string;
     a_location: string;
     a_description: string;
-    a_name: string;
+    a_creator_name: string;
     a_creator_email: string;
     a_end_date: Date;
     timeslots: AppointmentDate[];
@@ -17,7 +17,7 @@ var collectedData: AppointmentData = {
     a_title: "",
     a_location: "",
     a_description: "",
-    a_name: "",
+    a_creator_name: "",
     a_creator_email: "",
     a_end_date: null,
     timeslots: []
@@ -29,6 +29,9 @@ var locationInput: HTMLInputElement;
 var descriptionInput: HTMLInputElement;
 var nameGiven: boolean = false;
 var activeButton: HTMLButtonElement;
+var creatorNameInput: HTMLInputElement;
+var creatorEmailInput: HTMLInputElement;
+var creatorGiven = false;
 
 var newTimeslot = document.createElement("div") as HTMLDivElement;
 var plusSign = document.createElement("div") as HTMLDivElement;
@@ -66,12 +69,13 @@ newTimeslotButton.append(document.createTextNode("Add"));
 newTimeslotButton.classList.add("button-clickable");
 newTimeSlotInput.append(newTimeslotButton);
 newTimeslot.append(newTimeSlotInput);
-var newTimeSlotFinishedSlot = document.createElement("div");
+var newTimeSlotFinishedSlot = document.createElement("div") as HTMLDivElement;
 newTimeSlotFinishedSlot.append(document.createElement("div"));
 newTimeSlotFinishedSlot.append(document.createElement("div"));
 newTimeSlotFinishedSlot.classList.add("timeslot-finished", "hide", "fade-in");
 newTimeslot.append(newTimeSlotFinishedSlot);
 var timeSlotID: number = 0;
+var intervalFunction;
 
 var listener = () => {goTo(1)};
 
@@ -84,25 +88,45 @@ function goTo(page: number) {
         }
     }
     if (page == 1) {
+        clearInterval(intervalFunction);
         mainBox.classList.remove("main-box-full");
         mainBox.classList.add("main-box-large");
-    } else if (page == 2) {
-        mainBox.classList.remove("main-box-large");
-        mainBox.classList.add("main-box-full");
-    }
-    if (page == 1) {
         nameInput = document.querySelector("div.options-content input[name = 'name']") as HTMLInputElement;
         nameInput.value = collectedData.a_title;
         listener = () => {goTo(2)};
         activeButton = document.querySelector("div.options-content-main button") as HTMLButtonElement;
         nameGiven = false;
+        intervalFunction = setInterval(handleNameInput, 100);
     }
     if (page == 2) {
+        clearInterval(intervalFunction);
+        mainBox.classList.remove("main-box-large");
+        mainBox.classList.add("main-box-full");
         collectedData.a_location = locationInput.value;
         collectedData.a_description = descriptionInput.value;
         document.querySelector(".calendar-header-tags .calendar-header-name").append(collectedData.a_title);
         document.querySelector(".calendar-header-tags .calendar-header-location").append(collectedData.a_location);
         document.querySelector(".calendar-header-tags .calendar-header-description").append(collectedData.a_description);
+    }
+    if (page == 3) {
+        clearInterval(intervalFunction);
+        listener = () => {goTo(4)};
+        activeButton = document.querySelector("div.creator-bottom-buttons .button-forward") as HTMLButtonElement;
+        intervalFunction = setInterval(handleCreatorInput, 100);
+        mainBox.classList.remove("main-box-full");
+        mainBox.classList.add("main-box-large");
+    }
+    if (page == 4) {
+        mainBox.classList.remove("main-box-large");
+        mainBox.classList.remove("main-box-full");
+        clearInterval(intervalFunction);
+        ajaxPushAppointment(collectedData);
+    }
+    if (page == 5) {
+        mainBox.classList.remove("main-box-large");
+        mainBox.classList.add("main-box-full");
+        let params = new URLSearchParams(location.search);
+        ajaxPullAppointment(params.get("x"));
     }
 }
 
@@ -125,9 +149,10 @@ function addTimeSlot(e: Event) {
     collectedData.timeslots.push({a_start: startDate, a_end: endDate});
     addButton.parentElement.remove();
     if(timeSlotID == 1) {
-        let finishButton = document.querySelector(".calendar-bottom-buttons .button-unclickable") as HTMLButtonElement;
-        finishButton.classList.remove("button-unclickable");
-        finishButton.classList.add("button-clickable");
+        let nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable") as HTMLButtonElement;
+        nextButton.classList.remove("button-unclickable");
+        nextButton.classList.add("button-clickable");
+        nextButton.addEventListener("click", () => {goTo(3)});
     }
     addPlusSign();
 }
@@ -168,36 +193,73 @@ function handleNameInput() {
     }
 }
 
-function ajaxPull(link: string) {
+function handleCreatorInput() {
+    collectedData.a_creator_email = creatorEmailInput.value;
+    collectedData.a_creator_name = creatorNameInput.value;
+    if(creatorNameInput.value != "" && creatorEmailInput.value != "" && !creatorGiven) {
+        activeButton.addEventListener("click", listener);
+        activeButton.classList.add("button-clickable");
+        activeButton.classList.remove("button-unclickable");
+        creatorGiven = true;
+    } else if ((creatorNameInput.value == "" || creatorEmailInput.value == "") && creatorGiven) {
+        activeButton.removeEventListener("click", listener);
+        activeButton.classList.add("button-unclickable");
+        activeButton.classList.remove("button-clickable");
+        creatorGiven = false;
+    }
+}
+
+function ajaxPullAppointment(link: string) {
     $.ajax({
         type: "get",
         url: "backend/scripts/api.php",
         dataType: "json",
         data: {baselink:link},
         success: function(data: AppointmentData) {
-            console.log(data.a_title);
-            console.log(data.timeslots);
-            console.log(data);
+            let headline = document.createElement("h1");
+            headline.append(document.createTextNode(data.a_title));
+            document.querySelector("div.appointment-content header").append(headline);
+            let vote = document.querySelector("div.appointment-content-main-vote");
+            for (let i = 0; i < data.timeslots.length; i++) {
+                let timeslot = newTimeSlotFinishedSlot.cloneNode(true) as HTMLDivElement;
+                timeslot.classList.remove("hide");
+                let start = timeslot.firstChild as HTMLDivElement;
+                start.append(document.createTextNode(data.timeslots[i].a_start.toString()));
+                let end = timeslot.children[1] as HTMLDivElement;
+                end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
+                let checkbox = document.createElement("input") as HTMLInputElement;
+                checkbox.setAttribute("type", "checkbox");
+                let checkboxDiv = document.createElement("div") as HTMLDivElement;
+                checkboxDiv.classList.add("appointment-checkbox");
+                checkboxDiv.append(checkbox);
+                timeslot.append(checkboxDiv);
+                vote.append(timeslot);
+            }
         },
         error: function(xhr, textStatus, errorThrown) {
-            alert(xhr.responseText);
+            let appointment = document.querySelector("div.appointment-content-main") as HTMLDivElement;
+            appointment.innerHTML = xhr.responseText;
         }
     });
 }
 
-function ajaxPush(appointment: AppointmentData) {
+interface HashData {
+    a_baselink: string;
+}
+
+function ajaxPushAppointment(appointment: AppointmentData) {
     $.ajax({
-        type: "get",
+        type: "post",
         url: "backend/scripts/api.php",
         dataType: "json",
         data: appointment,
-        success: function(data: AppointmentData) {
-            console.log(data.a_title);
-            console.log(data.timeslots);
-            console.log(data);
+        success: function(data: HashData) {
+            history.replaceState({}, "", "?x=" + data.a_baselink);
+            goTo(5);
         },
         error: function(xhr, textStatus, errorThrown) {
-            alert(xhr.responseText);
+            let loading = document.querySelector("div.loading-content") as HTMLDivElement;
+            loading.innerHTML = xhr.responseText;
         }
     });
 }
@@ -206,16 +268,26 @@ window.onload = () => {
     divs[0] = document.querySelector("div.create-new-appointment-content") as HTMLDivElement;
     divs[1] = document.querySelector("div.options-content") as HTMLDivElement;
     divs[2] = document.querySelector("div.calendar-content") as HTMLDivElement;
+    divs[3] = document.querySelector("div.creator-content") as HTMLDivElement;
+    divs[4] = document.querySelector("div.loading-content") as HTMLDivElement;
+    divs[5] = document.querySelector("div.appointment-content") as HTMLDivElement;
     mainBox = document.querySelector("div.main-box") as HTMLDivElement;
     activeButton = document.querySelector("div.create-new-appointment-content button") as HTMLButtonElement;
     document.querySelector("div.calendar-bottom-buttons .button-back").addEventListener("click", () => {goTo(1)});
+    document.querySelector("div.creator-bottom-buttons .button-back").addEventListener("click", () => {goTo(2)});
     nameInput = document.querySelector("div.create-new-appointment-content input") as HTMLInputElement;
     locationInput = document.querySelector("div.options-content input[name = 'location']") as HTMLInputElement;
     descriptionInput = document.querySelector("div.options-content input[name = 'description']") as HTMLInputElement;
-    setInterval(handleNameInput, 100);
+    creatorNameInput = document.querySelector("div.creator-content input[name = 'creatorName']") as HTMLInputElement;
+    creatorEmailInput = document.querySelector("div.creator-content input[name = 'creatorEmail']") as HTMLInputElement;
+    intervalFunction = setInterval(handleNameInput, 100);
     let inputs = document.getElementsByTagName("input") as HTMLCollectionOf<HTMLInputElement>;
     for (let i = 0; i < inputs.length; i++) {
         inputs[i].value = "";
     }
     addPlusSign();
+    let params = new URLSearchParams(location.search);
+    if (params.get("x") != null) {
+        goTo(5);
+    }
 }

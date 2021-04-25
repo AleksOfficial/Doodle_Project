@@ -1,0 +1,15 @@
+.appointment-content-main-vote {
+  display: flex;
+}
+
+.appointment-content-main-vote .timeslot-finished {
+  margin: 20px;
+}
+
+.appointment-checkbox {
+  text-align: center;
+}
+
+.appointment-content-main-button {
+  text-align: center;
+}
