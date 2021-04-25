@@ -1,11 +1,11 @@
 var collectedData = {
-    name: "",
-    location: "",
-    description: "",
-    creatorName: "",
-    creatorEmail: "",
-    validUntil: null,
-    dates: []
+    a_title: "",
+    a_location: "",
+    a_description: "",
+    a_name: "",
+    a_creator_email: "",
+    a_end_date: null,
+    timeslots: []
 };
 var divs = [];
 var mainBox;
@@ -76,17 +76,17 @@ function goTo(page) {
     }
     if (page == 1) {
         nameInput = document.querySelector("div.options-content input[name = 'name']");
-        nameInput.value = collectedData.name;
+        nameInput.value = collectedData.a_title;
         listener = function () { goTo(2); };
         activeButton = document.querySelector("div.options-content-main button");
         nameGiven = false;
     }
     if (page == 2) {
-        collectedData.location = locationInput.value;
-        collectedData.description = descriptionInput.value;
-        document.querySelector(".calendar-header-tags .calendar-header-name").append(collectedData.name);
-        document.querySelector(".calendar-header-tags .calendar-header-location").append(collectedData.location);
-        document.querySelector(".calendar-header-tags .calendar-header-description").append(collectedData.description);
+        collectedData.a_location = locationInput.value;
+        collectedData.a_description = descriptionInput.value;
+        document.querySelector(".calendar-header-tags .calendar-header-name").append(collectedData.a_title);
+        document.querySelector(".calendar-header-tags .calendar-header-location").append(collectedData.a_location);
+        document.querySelector(".calendar-header-tags .calendar-header-description").append(collectedData.a_description);
     }
 }
 function addTimeSlot(e) {
@@ -105,7 +105,7 @@ function addTimeSlot(e) {
         + endDate.getMinutes();
     finishedTimeSlot.children[0].append(document.createTextNode(startString));
     finishedTimeSlot.children[1].append(document.createTextNode(endString));
-    collectedData.dates.push({ from: startDate, to: endDate });
+    collectedData.timeslots.push({ a_start: startDate, a_end: endDate });
     addButton.parentElement.remove();
     if (timeSlotID == 1) {
         var finishButton = document.querySelector(".calendar-bottom-buttons .button-unclickable");
@@ -133,7 +133,7 @@ function addPlusSign() {
     newSlot.addEventListener("click", handlePlusSignClickListener);
 }
 function handleNameInput() {
-    collectedData.name = nameInput.value;
+    collectedData.a_title = nameInput.value;
     if (nameInput.value != "" && !nameGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
@@ -146,6 +146,22 @@ function handleNameInput() {
         activeButton.classList.remove("button-clickable");
         nameGiven = false;
     }
+}
+function ajaxRequest(link) {
+    $.ajax({
+        type: "get",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: { baselink: link },
+        success: function (data) {
+            console.log(data.a_title);
+            console.log(data.timeslots);
+            console.log(data);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            alert(xhr.responseText);
+        }
+    });
 }
 window.onload = function () {
     divs[0] = document.querySelector("div.create-new-appointment-content");
@@ -163,4 +179,5 @@ window.onload = function () {
         inputs[i].value = "";
     }
     addPlusSign();
+    ajaxRequest("bla");
 };

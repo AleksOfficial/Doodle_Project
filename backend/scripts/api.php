@@ -5,6 +5,13 @@ function getData($baselink)
     $data["a_title"] = "Testevent";
     $data["a_location"] = "Teststraße";
     $data["a_description"] = "Testbeschreibung";
+    $data["a_name"] = "Test Testersson";
+    $data["a_creator_email"] = "testi@test.com";
+    $data["timeslots"] = [];
+    $data["timeslots"][0]["a_start"] = "2021-04-30T12:00";
+    $data["timeslots"][0]["a_end"] = "2021-04-30T13:00";
+    $data["timeslots"][1]["a_start"] = "2021-04-30T14:00";
+    $data["timeslots"][2]["a_end"] = "2021-04-30T15:00";
     return $data;
 }
 
