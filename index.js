@@ -2,7 +2,7 @@ var collectedData = {
     a_title: "",
     a_location: "",
     a_description: "",
-    a_name: "",
+    a_creator_name: "",
     a_creator_email: "",
     a_end_date: null,
     timeslots: []
@@ -172,6 +172,8 @@ function handleNameInput() {
     }
 }
 function handleCreatorInput() {
+    collectedData.a_creator_email = creatorEmailInput.value;
+    collectedData.a_creator_name = creatorNameInput.value;
     if (creatorNameInput.value != "" && creatorEmailInput.value != "" && !creatorGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
