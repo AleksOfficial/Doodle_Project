@@ -129,7 +129,6 @@ function addTimeSlot(e: Event) {
         finishButton.classList.remove("button-unclickable");
         finishButton.classList.add("button-clickable");
     }
-    alert(startDate < endDate);
     addPlusSign();
 }
 var addTimeSlotListener = (e: Event) => {addTimeSlot(e)};
