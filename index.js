@@ -14,6 +14,9 @@ var locationInput;
 var descriptionInput;
 var nameGiven = false;
 var activeButton;
+var creatorNameInput;
+var creatorEmailInput;
+var creatorGiven = false;
 var newTimeslot = document.createElement("div");
 var plusSign = document.createElement("div");
 newTimeslot.classList.add("timeslot", "fade-in");
@@ -56,6 +59,7 @@ newTimeSlotFinishedSlot.append(document.createElement("div"));
 newTimeSlotFinishedSlot.classList.add("timeslot-finished", "hide", "fade-in");
 newTimeslot.append(newTimeSlotFinishedSlot);
 var timeSlotID = 0;
+var intervalFunction;
 var listener = function () { goTo(1); };
 function goTo(page) {
     for (var i = 0; i < divs.length; i++) {
@@ -67,26 +71,45 @@ function goTo(page) {
         }
     }
     if (page == 1) {
+        clearInterval(intervalFunction);
         mainBox.classList.remove("main-box-full");
         mainBox.classList.add("main-box-large");
-    }
-    else if (page == 2) {
-        mainBox.classList.remove("main-box-large");
-        mainBox.classList.add("main-box-full");
-    }
-    if (page == 1) {
         nameInput = document.querySelector("div.options-content input[name = 'name']");
         nameInput.value = collectedData.a_title;
         listener = function () { goTo(2); };
         activeButton = document.querySelector("div.options-content-main button");
         nameGiven = false;
+        intervalFunction = setInterval(handleNameInput, 100);
     }
     if (page == 2) {
+        clearInterval(intervalFunction);
+        mainBox.classList.remove("main-box-large");
+        mainBox.classList.add("main-box-full");
         collectedData.a_location = locationInput.value;
         collectedData.a_description = descriptionInput.value;
         document.querySelector(".calendar-header-tags .calendar-header-name").append(collectedData.a_title);
         document.querySelector(".calendar-header-tags .calendar-header-location").append(collectedData.a_location);
         document.querySelector(".calendar-header-tags .calendar-header-description").append(collectedData.a_description);
+    }
+    if (page == 3) {
+        clearInterval(intervalFunction);
+        listener = function () { goTo(4); };
+        activeButton = document.querySelector("div.creator-bottom-buttons .button-forward");
+        intervalFunction = setInterval(handleCreatorInput, 100);
+        mainBox.classList.remove("main-box-full");
+        mainBox.classList.add("main-box-large");
+    }
+    if (page == 4) {
+        mainBox.classList.remove("main-box-large");
+        mainBox.classList.remove("main-box-full");
+        clearInterval(intervalFunction);
+        ajaxPushAppointment(collectedData);
+    }
+    if (page == 5) {
+        mainBox.classList.remove("main-box-large");
+        mainBox.classList.add("main-box-full");
+        var params = new URLSearchParams(location.search);
+        ajaxPullAppointment(params.get("x"));
     }
 }
 function addTimeSlot(e) {
@@ -108,9 +131,10 @@ function addTimeSlot(e) {
     collectedData.timeslots.push({ a_start: startDate, a_end: endDate });
     addButton.parentElement.remove();
     if (timeSlotID == 1) {
-        var finishButton = document.querySelector(".calendar-bottom-buttons .button-unclickable");
-        finishButton.classList.remove("button-unclickable");
-        finishButton.classList.add("button-clickable");
+        var nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable");
+        nextButton.classList.remove("button-unclickable");
+        nextButton.classList.add("button-clickable");
+        nextButton.addEventListener("click", function () { goTo(3); });
     }
     addPlusSign();
 }
@@ -147,19 +171,66 @@ function handleNameInput() {
         nameGiven = false;
     }
 }
-function ajaxRequest(link) {
+function handleCreatorInput() {
+    if (creatorNameInput.value != "" && creatorEmailInput.value != "" && !creatorGiven) {
+        activeButton.addEventListener("click", listener);
+        activeButton.classList.add("button-clickable");
+        activeButton.classList.remove("button-unclickable");
+        creatorGiven = true;
+    }
+    else if ((creatorNameInput.value == "" || creatorEmailInput.value == "") && creatorGiven) {
+        activeButton.removeEventListener("click", listener);
+        activeButton.classList.add("button-unclickable");
+        activeButton.classList.remove("button-clickable");
+        creatorGiven = false;
+    }
+}
+function ajaxPullAppointment(link) {
     $.ajax({
         type: "get",
         url: "backend/scripts/api.php",
         dataType: "json",
         data: { baselink: link },
         success: function (data) {
-            console.log(data.a_title);
-            console.log(data.timeslots);
-            console.log(data);
+            var headline = document.createElement("h1");
+            headline.append(document.createTextNode(data.a_title));
+            document.querySelector("div.appointment-content header").append(headline);
+            var vote = document.querySelector("div.appointment-content-main-vote");
+            for (var i = 0; i < data.timeslots.length; i++) {
+                var timeslot = newTimeSlotFinishedSlot.cloneNode(true);
+                timeslot.classList.remove("hide");
+                var start = timeslot.firstChild;
+                start.append(document.createTextNode(data.timeslots[i].a_start.toString()));
+                var end = timeslot.children[1];
+                end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
+                var checkbox = document.createElement("input");
+                checkbox.setAttribute("type", "checkbox");
+                var checkboxDiv = document.createElement("div");
+                checkboxDiv.classList.add("appointment-checkbox");
+                checkboxDiv.append(checkbox);
+                timeslot.append(checkboxDiv);
+                vote.append(timeslot);
+            }
         },
         error: function (xhr, textStatus, errorThrown) {
-            alert(xhr.responseText);
+            var appointment = document.querySelector("div.appointment-content-main");
+            appointment.innerHTML = xhr.responseText;
+        }
+    });
+}
+function ajaxPushAppointment(appointment) {
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: appointment,
+        success: function (data) {
+            history.replaceState({}, "", "?x=" + data.a_baselink);
+            goTo(5);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            var loading = document.querySelector("div.loading-content");
+            loading.innerHTML = xhr.responseText;
         }
     });
 }
@@ -167,17 +238,26 @@ window.onload = function () {
     divs[0] = document.querySelector("div.create-new-appointment-content");
     divs[1] = document.querySelector("div.options-content");
     divs[2] = document.querySelector("div.calendar-content");
+    divs[3] = document.querySelector("div.creator-content");
+    divs[4] = document.querySelector("div.loading-content");
+    divs[5] = document.querySelector("div.appointment-content");
     mainBox = document.querySelector("div.main-box");
     activeButton = document.querySelector("div.create-new-appointment-content button");
     document.querySelector("div.calendar-bottom-buttons .button-back").addEventListener("click", function () { goTo(1); });
+    document.querySelector("div.creator-bottom-buttons .button-back").addEventListener("click", function () { goTo(2); });
     nameInput = document.querySelector("div.create-new-appointment-content input");
     locationInput = document.querySelector("div.options-content input[name = 'location']");
     descriptionInput = document.querySelector("div.options-content input[name = 'description']");
-    setInterval(handleNameInput, 100);
+    creatorNameInput = document.querySelector("div.creator-content input[name = 'creatorName']");
+    creatorEmailInput = document.querySelector("div.creator-content input[name = 'creatorEmail']");
+    intervalFunction = setInterval(handleNameInput, 100);
     var inputs = document.getElementsByTagName("input");
     for (var i = 0; i < inputs.length; i++) {
         inputs[i].value = "";
     }
     addPlusSign();
-    ajaxRequest("bla");
+    var params = new URLSearchParams(location.search);
+    if (params.get("x") != null) {
+        goTo(5);
+    }
 };

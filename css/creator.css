@@ -1,0 +1,29 @@
+.creator-bottom-buttons .button-back {
+  float: left;
+}
+
+.creator-bottom-buttons .button-forward {
+  float: right;
+}
+
+.creator-content {
+  padding-bottom: 30px;
+}
+
+.creator-content-main {
+  padding-bottom: 30px;
+}
+
+.creator-content header {
+  text-align: center;
+}
+
+.creator-content h1 {
+  width: 100%;
+  padding-bottom: 30px;
+  font-size: 2.5em;
+}
+
+.creator-content input {
+  width: 100%;
+}

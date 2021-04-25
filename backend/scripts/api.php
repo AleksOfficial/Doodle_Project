@@ -1,8 +1,11 @@
 <?php
-spl_autoload_register(function($class){include_once "../classes/". $class . ".class.php";});
+spl_autoload_register(function ($class) {
+    include_once "../classes/" . $class . ".class.php";
+});
+
 function getData($baselink)
 {
-    
+
 
     $_db = new Db_get_appointments();
     $data = $_db->get_appointment($baselink);
@@ -39,4 +42,10 @@ if (isset($_GET['baselink'])) {
     response(null);
 }
 
-//if (isset($_POST['']));
+/*
+if (isset($_POST['a_title'])) {
+    $database = new Db_set_appointment($_POST);
+    $response = $database->getHashes();
+    $this->response($response);
+}
+*/
