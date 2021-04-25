@@ -185,12 +185,12 @@ function ajaxPull(link: string) {
     });
 }
 
-function ajaxPush(data: AppointmentData) {
+function ajaxPush(appointment: AppointmentData) {
     $.ajax({
         type: "get",
         url: "backend/scripts/api.php",
         dataType: "json",
-        data: {baselink:link},
+        data: appointment,
         success: function(data: AppointmentData) {
             console.log(data.a_title);
             console.log(data.timeslots);
