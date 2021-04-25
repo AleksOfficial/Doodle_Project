@@ -19,8 +19,8 @@ function response($data)
     }
 }
 
-if (isset($_GET['x'])) {
-    response(getData($_GET['x']));
+if (isset($_GET['baselink'])) {
+    response(getData($_GET['baselink']));
 } else {
     response(null);
 }
