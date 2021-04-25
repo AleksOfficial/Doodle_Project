@@ -5,7 +5,7 @@ import requests
 import time
 
 while(42):
-    http = requests.get('http://127.0.0.1/doodle_project/backend/scripts/send_mail.php')
+    http = requests.get('http://127.0.0.1/doodle_project/backend/scripts/check_polls.php')
     
-    print(http.status_code)
+    print(http.text)
     time.sleep(5)

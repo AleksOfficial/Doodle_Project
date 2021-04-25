@@ -1,5 +1,6 @@
 <?php
-class Db_con
+//Inherit from this class in order to get DB functionality
+abstract class Db_con
 {
   private $host = "localhost";
   private $user = "hello_world";

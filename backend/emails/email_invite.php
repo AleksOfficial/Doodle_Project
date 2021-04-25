@@ -440,7 +440,7 @@
             <tr>
               <td class="email-masthead">
                 <a href="localhost/webtech/webdev_project/index.php" class="f-fallback email-masthead_name">
-                RIFT
+                Doodle Clone
               </a>
               </td>
             </tr>
@@ -453,7 +453,7 @@
                     <td class="content-cell">
                       <div class="f-fallback">
                         <h1>Hi 👋</h1>
-                        <p>Someone added you to an appointment poll - Title: <strong>{{title}}</strong><br><br>Navigate with button below to cast your vote 🗳️. </p>
+                        <p>{{creator_name}} added you to an appointment poll - Title: <strong>{{title}}</strong><br><br>Navigate with button below to cast your vote 🗳️. </p>
                         
                         <!-- Action -->
                         <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">

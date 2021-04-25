@@ -18,13 +18,15 @@ f_* = foreign key
 
 CREATE TABLE t_mail(
   p_m_id INTEGER PRIMARY KEY AUTO_INCREMENT,
-  a_email varchar(160) NOT NULL UNIQUE
+  a_email varchar(160) NOT NULL UNIQUE,
+  a_name VARCHAR(160)
 );
 
 CREATE TABLE t_events(
   p_e_id INTEGER PRIMARY KEY AUTO_INCREMENT,
   a_end_date DATETIME NOT NULL,
   a_creator_hash VARCHAR(500) NOT NULL,
+  f_m_id INTEGER NOT NULL,
   a_baselink VARCHAR (64) NOT NULL UNIQUE,
   a_title VARCHAR(100) NOT NULL,
   a_location VARCHAR (64),
@@ -42,9 +44,10 @@ CREATE TABLE t_invites (
 CREATE TABLE t_timeslots(
   p_time_id INTEGER PRIMARY KEY AUTO_INCREMENT,
   f_e_id INTEGER NOT NULL,
+  f_m_id INTEGER NOT NULL,
   a_start DATETIME NOT NULL, 
   a_end DATETIME NOT NULL,
-  a_creator_hash VARCHAR(500),
+  a_creator_hash VARCHAR(500) NOT NULL,
   CONSTRAINT UQ_timeslots UNIQUE(f_e_id, a_start, a_end)
 );
 /*
@@ -63,6 +66,9 @@ CREATE TABLE t_votes(
 ALTER TABLE t_invites
   ADD CONSTRAINT FK_invites_events FOREIGN KEY(f_e_id) REFERENCES t_events(p_e_id) ON DELETE CASCADE,
   ADD CONSTRAINT FK_invites_mail FOREIGN KEY(f_m_id) REFERENCES t_mail(p_m_id) ON DELETE RESTRICT;
+
+ALTER TABLE t_events
+  ADD CONSTRAINT FK_events_mail FOREIGN KEY(f_m_id) REFERENCES t_mail(p_m_id) ON DELETE RESTRICT;
 
 ALTER TABLE t_timeslots
   ADD CONSTRAINT FK_timeslots_events FOREIGN KEY(f_e_id) REFERENCES t_events(p_e_id) ON DELETE CASCADE;

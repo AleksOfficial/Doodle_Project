@@ -453,7 +453,7 @@
                     <td class="content-cell">
                       <div class="f-fallback">
                         <h1>Woohoo 🥳</h1>
-                        <p>You created an appointment poll - Title: <strong>{{title}}</strong><br><br>In case you lost your link or didn't vote yet, the button below will navigate you back to your poll 🗳️. </p>
+                        <p>You created an appointment poll - Title: <strong>{{title}}</strong><br><br>The button below will navigate you to your poll 🗳️. </p>
                         
                         <!-- Action -->
                         <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">

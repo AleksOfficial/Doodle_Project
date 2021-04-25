@@ -440,7 +440,7 @@
             <tr>
               <td class="email-masthead">
                 <a href="localhost/webtech/webdev_project/index.php class="f-fallback email-masthead_name">
-                RIFT
+                Doodle Clone
               </a>
               </td>
             </tr>
