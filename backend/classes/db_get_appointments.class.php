@@ -23,7 +23,7 @@ class Db_get_appointments extends Db_con
             //Return all entries with Timeslots, then at the position timeslots of
             $appointment = $stmt->fetch();
             if(!$appointment){
-                $this->error("Error: Appointment not found in the Database");
+                //$this->error("Error: Appointment not found in the Database");
                 return NULL;
             }  
             $appointment["timeslots"] = $this->get_timeslots_to_appointment($appointment['p_e_id']);
