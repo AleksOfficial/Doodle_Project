@@ -1,26 +1,26 @@
 interface AppointmentDate {
-    from: Date;
-    to: Date;
+    a_start: Date;
+    a_end: Date;
 }
 
 interface AppointmentData {
-    name: string;
-    location: string;
-    description: string;
-    creatorName: string;
-    creatorEmail: string;
-    validUntil: Date;
-    dates: AppointmentDate[];
+    a_title: string;
+    a_location: string;
+    a_description: string;
+    a_name: string;
+    a_creator_email: string;
+    a_end_date: Date;
+    timeslots: AppointmentDate[];
 }
 
 var collectedData: AppointmentData = {
-    name: "",
-    location: "",
-    description: "",
-    creatorName: "",
-    creatorEmail: "",
-    validUntil: null,
-    dates: []
+    a_title: "",
+    a_location: "",
+    a_description: "",
+    a_name: "",
+    a_creator_email: "",
+    a_end_date: null,
+    timeslots: []
 }
 var divs: HTMLDivElement[] = [];
 var mainBox: HTMLDivElement;
@@ -92,17 +92,17 @@ function goTo(page: number) {
     }
     if (page == 1) {
         nameInput = document.querySelector("div.options-content input[name = 'name']") as HTMLInputElement;
-        nameInput.value = collectedData.name;
+        nameInput.value = collectedData.a_title;
         listener = () => {goTo(2)};
         activeButton = document.querySelector("div.options-content-main button") as HTMLButtonElement;
         nameGiven = false;
     }
     if (page == 2) {
-        collectedData.location = locationInput.value;
-        collectedData.description = descriptionInput.value;
-        document.querySelector(".calendar-header-tags .calendar-header-name").append(collectedData.name);
-        document.querySelector(".calendar-header-tags .calendar-header-location").append(collectedData.location);
-        document.querySelector(".calendar-header-tags .calendar-header-description").append(collectedData.description);
+        collectedData.a_location = locationInput.value;
+        collectedData.a_description = descriptionInput.value;
+        document.querySelector(".calendar-header-tags .calendar-header-name").append(collectedData.a_title);
+        document.querySelector(".calendar-header-tags .calendar-header-location").append(collectedData.a_location);
+        document.querySelector(".calendar-header-tags .calendar-header-description").append(collectedData.a_description);
     }
 }
 
@@ -122,7 +122,7 @@ function addTimeSlot(e: Event) {
                 + endDate.getMinutes();
     finishedTimeSlot.children[0].append(document.createTextNode(startString));
     finishedTimeSlot.children[1].append(document.createTextNode(endString));
-    collectedData.dates.push({from: startDate, to: endDate});
+    collectedData.timeslots.push({a_start: startDate, a_end: endDate});
     addButton.parentElement.remove();
     if(timeSlotID == 1) {
         let finishButton = document.querySelector(".calendar-bottom-buttons .button-unclickable") as HTMLButtonElement;
@@ -154,7 +154,7 @@ function addPlusSign() {
 }
 
 function handleNameInput() {
-    collectedData.name = nameInput.value;
+    collectedData.a_title = nameInput.value;
     if(nameInput.value != "" && !nameGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
@@ -168,16 +168,33 @@ function handleNameInput() {
     }
 }
 
-function ajaxRequest(dataMethod, dataParam) {
+function ajaxPull(link: string) {
     $.ajax({
         type: "get",
-        url: "data.php",
+        url: "backend/scripts/api.php",
         dataType: "json",
-        data: {method:dataMethod, param:dataParam},
-        success: function(data) {
-            for (index in data) {
-                $("ol").append("<li>" + data[index] + "</li>");
-            }
+        data: {baselink:link},
+        success: function(data: AppointmentData) {
+            console.log(data.a_title);
+            console.log(data.timeslots);
+            console.log(data);
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            alert(xhr.responseText);
+        }
+    });
+}
+
+function ajaxPush(data: AppointmentData) {
+    $.ajax({
+        type: "get",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: {baselink:link},
+        success: function(data: AppointmentData) {
+            console.log(data.a_title);
+            console.log(data.timeslots);
+            console.log(data);
         },
         error: function(xhr, textStatus, errorThrown) {
             alert(xhr.responseText);
