@@ -194,6 +194,8 @@ function handleNameInput() {
 }
 
 function handleCreatorInput() {
+    collectedData.a_creator_email = creatorEmailInput.value;
+    collectedData.a_creator_name = creatorNameInput.value;
     if(creatorNameInput.value != "" && creatorEmailInput.value != "" && !creatorGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
