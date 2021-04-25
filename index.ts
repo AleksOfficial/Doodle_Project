@@ -168,6 +168,23 @@ function handleNameInput() {
     }
 }
 
+function ajaxRequest(dataMethod, dataParam) {
+    $.ajax({
+        type: "get",
+        url: "data.php",
+        dataType: "json",
+        data: {method:dataMethod, param:dataParam},
+        success: function(data) {
+            for (index in data) {
+                $("ol").append("<li>" + data[index] + "</li>");
+            }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            alert(xhr.responseText);
+        }
+    });
+}
+
 window.onload = () => {
     divs[0] = document.querySelector("div.create-new-appointment-content") as HTMLDivElement;
     divs[1] = document.querySelector("div.options-content") as HTMLDivElement;

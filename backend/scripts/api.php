@@ -1,10 +1,11 @@
 <?php
 function getData($baselink)
 {
-    $data = [];
-    $database = new Database();
-    $rows = $database->getAppointment($baselink);
-    $data
+    $data["a_end_date"] = "2021-04-30T00:00";
+    $data["a_title"] = "Testevent";
+    $data["a_location"] = "Teststraße";
+    $data["a_description"] = "Testbeschreibung";
+    return $data;
 }
 
 function response($data)
@@ -18,10 +19,10 @@ function response($data)
     }
 }
 
-if (isset($_GET['method']) && isset($_GET['param'])) {
-    response(getData($_GET['method'], $_GET['param']));
+if (isset($_GET['x'])) {
+    response(getData($_GET['x']));
 } else {
     response(null);
 }
 
-if (isset($_POST['']));
+//if (isset($_POST['']));
