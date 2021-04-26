@@ -53,7 +53,7 @@ abstract class Db_con
     $appointment[1] = $array["a_creator_name"];
     $appointment[2] = $array["a_creator_email"];
     $appointment[3] = $array["a_baselink"];
-    $appointment[4] = $array["a_a_title"];
+    $appointment[4] = $array["a_title"];
     $appointment[5] = $array["a_location"];
     $appointment[6] = $array["a_description"];
     return $appointment;

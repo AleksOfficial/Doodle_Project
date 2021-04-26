@@ -71,7 +71,7 @@ class Db_create_stuff extends Db_con{
 
     function check_timeslotdata($array)
     {
-        
+        //check if the data is set and not empty
         if(!isset($array["a_start"]) || empty($array["a_start"]))
         {
             array_push($this->missing_data,"A start date for the timeslot.");
@@ -122,7 +122,7 @@ class Db_create_stuff extends Db_con{
             while(42)
             {
                 //All data is set, create Hashbytes
-                $array["a_baselink"] = hex2bin(random_bytes(32));
+                $array["a_baselink"] = bin2hex(random_bytes(32));
                 //check if the hashbytes are in the database
                 $query = "SELECT a_baselink FROM t_events WHERE a_baselink LIKE ?";
                 $stmt = $this->pdo->prepare($query);
@@ -138,7 +138,6 @@ class Db_create_stuff extends Db_con{
                     return NULL;
                 }
             }
-
 
             //Create appointment
             $appointment = $this->convert_to_appointment($array);
