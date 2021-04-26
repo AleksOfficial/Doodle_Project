@@ -2,6 +2,7 @@
 
 class DB_get_invites extends Db_con
 {
+  //This is just for the mails for now. maybe we will need the functionality somewhere else but rn it's good for mails only
   //Query DB - Look for Polls that are ending within 5 minutes and which ended exactly at that minute, retrieve title/e_id/baselink
   public function get_closing_polls()
   {
