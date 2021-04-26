@@ -40,8 +40,7 @@ CREATE TABLE t_comments(
 CREATE TABLE t_invites (
   p_i_id INTEGER PRIMARY KEY AUTO_INCREMENT,
   f_e_id INTEGER NOT NULL,
-  a_recipient_email INTEGER NOT NULL,  
-  CONSTRAINT UQ_invites UNIQUE (f_e_id,a_hashbytes)
+  a_recipient_email INTEGER NOT NULL
 );
 
 CREATE TABLE t_timeslots(
