@@ -1,5 +1,6 @@
 .appointment-content-main-vote {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .appointment-content-main-vote .timeslot-finished {
@@ -10,6 +11,12 @@
   text-align: center;
 }
 
-.appointment-content-main-button {
+.appointment-content-main-submit {
   text-align: center;
+}
+
+.appointment-content-main-submit button {
+  width: 20%;
+  min-width: 150px;
+  margin: 20px;
 }

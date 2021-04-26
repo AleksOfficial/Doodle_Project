@@ -13,10 +13,14 @@ var nameInput;
 var locationInput;
 var descriptionInput;
 var nameGiven = false;
+var nameAndEndTimeGiven = false;
 var activeButton;
 var creatorNameInput;
 var creatorEmailInput;
 var creatorGiven = false;
+var voterNameInput;
+var voterGiven = false;
+var endTimeInput;
 var newTimeslot = document.createElement("div");
 var plusSign = document.createElement("div");
 newTimeslot.classList.add("timeslot", "fade-in");
@@ -78,8 +82,7 @@ function goTo(page) {
         nameInput.value = collectedData.a_title;
         listener = function () { goTo(2); };
         activeButton = document.querySelector("div.options-content-main button");
-        nameGiven = false;
-        intervalFunction = setInterval(handleNameInput, 100);
+        intervalFunction = setInterval(handleOptionInput, 100);
     }
     if (page == 2) {
         clearInterval(intervalFunction);
@@ -100,14 +103,18 @@ function goTo(page) {
         mainBox.classList.add("main-box-large");
     }
     if (page == 4) {
+        clearInterval(intervalFunction);
         mainBox.classList.remove("main-box-large");
         mainBox.classList.remove("main-box-full");
         clearInterval(intervalFunction);
         ajaxPushAppointment(collectedData);
     }
     if (page == 5) {
+        clearInterval(intervalFunction);
+        intervalFunction = setInterval(handleVoteInput, 100);
         mainBox.classList.remove("main-box-large");
         mainBox.classList.add("main-box-full");
+        activeButton = document.querySelector("div.appointment-content-main-submit button");
         var params = new URLSearchParams(location.search);
         ajaxPullAppointment(params.get("x"));
     }
@@ -187,6 +194,44 @@ function handleCreatorInput() {
         creatorGiven = false;
     }
 }
+var numberOfVotes = 0;
+function voteListener(e) {
+    var target = e.target;
+    if (target.checked == true) {
+        numberOfVotes++;
+    }
+    else {
+        numberOfVotes--;
+    }
+}
+function handleVoteInput() {
+    if (voterNameInput.value != "" && numberOfVotes > 0 && !voterGiven) {
+        activeButton.addEventListener("click", listener);
+        activeButton.classList.add("button-clickable");
+        activeButton.classList.remove("button-unclickable");
+        voterGiven = true;
+    }
+    else if ((voterNameInput.value == "" || numberOfVotes <= 0) && voterGiven) {
+        activeButton.removeEventListener("click", listener);
+        activeButton.classList.add("button-unclickable");
+        activeButton.classList.remove("button-clickable");
+        voterGiven = false;
+    }
+}
+function handleOptionInput() {
+    if (nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
+        activeButton.addEventListener("click", listener);
+        activeButton.classList.add("button-clickable");
+        activeButton.classList.remove("button-unclickable");
+        nameAndEndTimeGiven = true;
+    }
+    else if ((nameInput.value == "" || endTimeInput.value == "") && nameAndEndTimeGiven) {
+        activeButton.removeEventListener("click", listener);
+        activeButton.classList.add("button-unclickable");
+        activeButton.classList.remove("button-clickable");
+        nameAndEndTimeGiven = false;
+    }
+}
 function ajaxPullAppointment(link) {
     $.ajax({
         type: "get",
@@ -207,6 +252,7 @@ function ajaxPullAppointment(link) {
                 end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
                 var checkbox = document.createElement("input");
                 checkbox.setAttribute("type", "checkbox");
+                checkbox.addEventListener("click", voteListener);
                 var checkboxDiv = document.createElement("div");
                 checkboxDiv.classList.add("appointment-checkbox");
                 checkboxDiv.append(checkbox);
@@ -243,6 +289,9 @@ window.onload = function () {
     divs[3] = document.querySelector("div.creator-content");
     divs[4] = document.querySelector("div.loading-content");
     divs[5] = document.querySelector("div.appointment-content");
+    var endTimeDiv = document.querySelector("div.options-content-end-time");
+    endTimeInput = newTimeSlotCalendarInput.cloneNode(true);
+    endTimeDiv.append(endTimeInput);
     mainBox = document.querySelector("div.main-box");
     activeButton = document.querySelector("div.create-new-appointment-content button");
     document.querySelector("div.calendar-bottom-buttons .button-back").addEventListener("click", function () { goTo(1); });
@@ -252,6 +301,7 @@ window.onload = function () {
     descriptionInput = document.querySelector("div.options-content input[name = 'description']");
     creatorNameInput = document.querySelector("div.creator-content input[name = 'creatorName']");
     creatorEmailInput = document.querySelector("div.creator-content input[name = 'creatorEmail']");
+    voterNameInput = document.querySelector("div.appointment-content-main-submit input");
     intervalFunction = setInterval(handleNameInput, 100);
     var inputs = document.getElementsByTagName("input");
     for (var i = 0; i < inputs.length; i++) {
