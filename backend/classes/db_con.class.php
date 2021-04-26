@@ -41,7 +41,30 @@ abstract class Db_con
     $date_database = new DateTime($timestamp);
     $now = date('D d M Y H:i:s');
     $date_now = new DateTime($now);
-    //$diff = $date_now->diff($date_msg);
+    $diff = $date_now->diff($date_database);
+    return date('D d M Y H:i:s',$diff);
+  }
+//This stuff can probably be solved with some implode function or so. getting all the keys and then looping through the length and appending each element or so
+//It will fullfill it's purpose for now tho
+  function convert_to_appointment($array)
+  {
+    $appointment = [];
+    $appointment[0] = $array["a_end_date"];
+    $appointment[1] = $array["a_creator_name"];
+    $appointment[2] = $array["a_creator_email"];
+    $appointment[3] = $array["a_baselink"];
+    $appointment[4] = $array["a_a_title"];
+    $appointment[5] = $array["a_location"];
+    $appointment[6] = $array["a_description"];
+    return $appointment;
+  }
+  function convert_to_timeslot($array)
+  {
+    $timeslot = [];
+    $appointment[0] = $array["f_e_id"];
+    $appointment[1] = $array["a_start"];
+    $appointment[2] = $array["a_end"];
+    return $appointment;
   }
 
 }

@@ -47,16 +47,22 @@ function responsePushAppointment($data)
     }
 }
 
+//Entry Point
+//Post
+
+
+
 if (isset($_GET['baselink'])) {
     responsePullAppointment(getData($_GET['baselink']));
 } else {
     responsePullAppointment(null);
 }
-
-/*
 if (isset($_POST['a_title'])) {
-    $database = new Db_set_appointment($_POST);
-    $response = $database->getHash();
-    $this->responsePushAppointment($response);
+    $connector = new Db_create_stuff();
+    $hash = $connector->create_appointment($_POST);
+    if($hash != NULL)
+        http_response_code(200);
+    else
+        http_response_code(500);
+    json_encode($hash); // Eckige Klammern?
 }
-*/
