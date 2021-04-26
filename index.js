@@ -219,6 +219,7 @@ function handleVoteInput() {
     }
 }
 function handleOptionInput() {
+    collectedData.a_end_date = new Date(endTimeInput.value);
     if (nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
