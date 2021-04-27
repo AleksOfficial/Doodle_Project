@@ -98,6 +98,10 @@ class Db_create_stuff extends Db_con
                 array_push($this->missing_data, "Your name to identify the vote.");
                 $this->error_occured = true;
             }
+            if (!isset($array["p_hashbytes"]) || empty($array["p_hashbytes"])) {
+                array_push($this->missing_data, "Your unique hashbytes.");
+                $this->error_occured = true;
+            }
             if ($this->error_occured) {
                 $this->error($this->error_missing, $this->missing_data);
                 $this->error_occured = false;
@@ -148,23 +152,11 @@ class Db_create_stuff extends Db_con
 
         //Check if all the necessary data is inserted
         if ($this->check_appointmentdata($array)) {
-            while (42) {
-                //All data is set, create Hashbytes
-                $array["a_baselink"] = bin2hex(random_bytes(32));
-                //check if the hashbytes are in the database
-                $query = "SELECT a_baselink FROM t_events WHERE a_baselink LIKE ?";
-                $stmt = $this->pdo->prepare($query);
-                $x = $stmt->execute([$array["a_baselink"]]);
-                if ($x) {
-                    if ($stmt->fetch() == NULL)
-                        break;
-                } else {
-                    $this->error($stmt->errorInfo()[2]);
-                    http_response_code(500);
-                    return NULL;
-                }
-            }
 
+            //All data is set, create Hashbytes
+            $array["a_baselink"] = $this->create_hashbytes("a_baselink","t_events");
+            if($array["a_baselink"] == NULL)
+                return NULL;
             //Create appointment
             $appointment = $this->convert_to_appointment($array);
             $query = "INSERT INTO t_events (a_end_date,a_creator_name,a_creator_email,a_baselink,a_title, a_location, a_description) 
@@ -181,6 +173,7 @@ class Db_create_stuff extends Db_con
             $foreign_key = $this->pdo->lastInsertId();
 
             //Create Timeslot entries
+            //There needs to be a check if this is actually an array!
             foreach ($array["timeslots"] as $timeslot) {
                 $this->create_timeslot($timeslot, $foreign_key);
             }
@@ -197,20 +190,30 @@ class Db_create_stuff extends Db_con
         }
         return NULL;
     }
+
+    
+
     function create_vote($array)
     {
-        if ($this->check_votedata($array)) {
-            //Insert the vote 
-            $vote = $this->convert_to_vote($array); //This thing does more than it seems. it retrieves the event id and Time id
-            $insert_query = "INSERT INTO t_votes (pf_i_id, pf_time_id, a_name) VALUES(?,?,?);";
-            $stmt = $this->pdo->prepare($insert_query);
-            $x = $stmt = $this->pdo->prepare($insert_query);
-            if ($x)
-                return true;
-            else {
-                $this->error($stmt->errorInfo()[2]);
-                return false;
+        $hashbytes = $this->create_hashbytes("p_hashbytes","t_votes");
+        if(isset($array["votes"]) && !empty($array["votes"]))
+        { 
+            foreach($array["votes"] as $vote)
+            {
+                $vote["p_hashbytes"] = $hashbytes;
+                if ($this->check_votedata($array)) {
+                    //Insert the vote 
+                    $vote = $this->convert_to_vote($array); //This thing does more than it seems. it retrieves the event id and Time id
+                    $insert_query = "INSERT INTO t_votes (p_hashbytes,pf_e_id, pf_time_id, a_name) VALUES(?,?,?,?);";
+                    $stmt = $this->pdo->prepare($insert_query);
+                    $x = $stmt = $this->pdo->prepare($insert_query);
+                    if (!$x) {
+                        $this->error($stmt->errorInfo()[2]);
+                        return NULL;
+                    }
+                }
             }
+
         }
     }
 
@@ -228,22 +231,27 @@ class Db_create_stuff extends Db_con
         }
     }
 
-
-    //This should be somewhere else... own class for get votes? 
-    function get_votes($baselink)
+    function create_hashbytes($field,$table)
     {
-        $query = "SELECT *
-        FROM t_votes
-        INNER JOIN t_timeslots ON t_votes.pf_time_id = t_timeslots.p_time_id
-        INNER JOIN t_events ON t_votes.pf_e_id = t_events.p_e_id
-        WHERE t_events.baselink LIKE ?";
-        $stmt = $this->pdo->prepare($query);
-        $x = $stmt->execute([$baselink]);
-        if ($x) {
-            return $stmt->fetchAll();
-        } else {
-            $this->error($stmt->errorInfo()[2]);
-            return NULL;
+        while(42)
+        {
+            $hashbytes = bin2hex(random_bytes(32));
+                //check if the hashbytes are in the database
+                $query = "SELECT ".$field." FROM ".$table." WHERE ".$field." LIKE ?";
+                $stmt = $this->pdo->prepare($query);
+                $x = $stmt->execute([$hashbytes]);
+                if ($x) {
+                    if ($stmt->fetch() == NULL)
+                        break;
+                } else {
+                    $this->error($stmt->errorInfo()[2]);
+                    http_response_code(500);
+                    return NULL;
+                }
         }
+        return $hashbytes;
     }
+
+
+
 }

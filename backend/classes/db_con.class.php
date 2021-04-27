@@ -69,6 +69,7 @@ abstract class Db_con
   function convert_to_vote($array)
   {
     //Set all variables that are needed to cast a vote, Better for readability
+    $hashbytes = $array["p_hashbytes"];
     $baselink = $array["a_baselink"];
     $name = $array["a_name"];
     $start_time = $array["a_start"];
@@ -106,6 +107,6 @@ abstract class Db_con
       $this->error($stmt->errorInfo()[2]);
       return NULL;
     }
-    return [$e_id, $time_id, $name];
+    return [$hashbytes,$e_id, $time_id, $name];
   }
 }
