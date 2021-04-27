@@ -66,5 +66,54 @@ abstract class Db_con
     $appointment[2] = $array["a_end"];
     return $appointment;
   }
+  function convert_to_vote($array)
+  {
+    //Set all variables that are needed to cast a vote, Better for readability
+    $baselink = $array["a_baselink"];
+    $name = $array["a_name"];
+    $start_time = $array["a_start"];
+    $end_time = $array["a_end"];
+    //Get ID from the event
+    $id_query = "SELECT p_e_id FROM t_events WHERE a_baselink LIKE = ?";
+    $stmt = $this->pdo->prepare($id_query);
+    $x = $stmt->execute([$baselink]);
+    if($x)
+    {
+        $e_id = $stmt->fetch();
+        //set event id from ass. array
+        if($e_id)
+            $e_id = $e_id["p_e_id"];
+        else
+        {
+            $this->error("Error: Could not load associated event ID.");
+            return NULL;
+        }
+    }
+    else{
+        $this->error($stmt->errorInfo()[2]);
+        return NULL;
+    }
+    //GET ID from Timeslot
+    $time_query = "SELECT p_time_id FROM t_timeslots WHERE a_start = ? AND a_end = ? AND f_e_id = ?";
+    $stmt = $this->pdo->prepare($time_query);
+    $x = $stmt->execute([$start_time,$end_time,$e_id]);
+    if($x)
+    {
+        $time_id = $stmt->fetch();
+        if($time_id)
+            $time_id = $time_id["p_time_id"];
+        else
+        {
+            $this->error("Error: Could not retrieve associated Time ID.");
+            return NULL;
+        }
+    }
+    else
+    {
+      $this->error($stmt->errorInfo()[2]);
+      return NULL;
+    }
+    return [$e_id,$time_id,$name];
+  }
 
 }

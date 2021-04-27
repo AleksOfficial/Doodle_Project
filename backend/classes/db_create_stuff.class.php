@@ -1,6 +1,9 @@
 <?php
 class Db_create_stuff extends Db_con
 {
+    //It would probably be nice to have some form of error class instead of handling the errors everywhere individually with each function
+    //Then you'd have a consistent error handling. Lack of time makes this quite difficult tho. We might come back to this at some point
+
     public $errorMessage = "";
     private $pdo;
     private $error_occured;
@@ -13,10 +16,8 @@ class Db_create_stuff extends Db_con
         $this->error_occured = false;
     }
 
-    //create Timeslots
-    //create invites
-    //create vote
-
+    
+    /// -- Check Data Functions -- 
     function check_appointmentdata($array)
     {
         //required fields
@@ -80,6 +81,35 @@ class Db_create_stuff extends Db_con
         return true;
     }
 
+    function check_votedata($array)
+    {
+        if($this->check_timeslotdata($array))
+        {
+            if(!isset($array["a_baselink"]) || empty($array["a_baselink"]))
+            {
+                array_push($this->missing_data, "Baselink to identify the event.");
+                $this->error_occured = true;
+            }
+            if(!isset($array["a_name"]) || empty($array["a_name"]))
+            {
+                array_push($this->missing_data, "Your name to identify the vote.");
+                $this->error_occured = true;
+            }
+            if ($this->error_occured) {
+                $this->error($this->error_missing, $this->missing_data);
+                $this->error_occured = false;
+                $this->error_missing = [];
+                return false;
+            }
+            return true;
+        }
+        else
+            return false;
+    }
+
+    /// -- Create Entries Functions --
+
+    //create Timeslots
     function create_timeslot($timeslot, $foreign_key)
     {
         if ($this->check_timeslotdata($timeslot)) {
@@ -90,6 +120,7 @@ class Db_create_stuff extends Db_con
             $stmt->execute($timeslot);
         }
     }
+    //create invites
     function create_invites($email, $foreign_key)
     {
         $query = "INSERT INTO t_invites (a_recipient_email,f_e_id) VALUES (?,?)";
@@ -154,5 +185,59 @@ class Db_create_stuff extends Db_con
             return $array["a_baselink"];
         }
         return NULL;
+    }
+    function create_vote($array)
+    {
+        if($this->check_votedata($array))
+        {
+            //Insert the vote 
+            $vote = $this->convert_to_vote($array); //This thing does more than it seems. it retrieves the event id and Time id
+            $insert_query = "INSERT INTO t_votes (pf_i_id, pf_time_id, a_name) VALUES(?,?,?);";
+            $stmt = $this->pdo->prepare($insert_query);
+            $x = $stmt = $this->pdo->prepare($insert_query);
+            if($x)
+                return true;
+            else{
+                $this->error($stmt->errorInfo()[2]);
+                return false;
+            }
+            
+        }
+    }
+
+    //This could also be called if votes need to be unique
+    //Deselect an option function 
+    function delete_vote($array){
+        if($this->check_votedata($array))
+        {
+            $vote = $this->convert_to_vote($array);
+            $query = "DELETE 
+                      FROM t_votes 
+                      WHERE pf_e_id = ? AND pf_time_id = ? AND a_name LIKE ?";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($vote);
+
+
+        }
+    }
+
+
+    //This should be somewhere else... own class for get votes? 
+    function get_votes($baselink)
+    {
+        $query = "SELECT *
+        FROM t_votes
+        INNER JOIN t_timeslots ON t_votes.pf_time_id = t_timeslots.p_time_id
+        INNER JOIN t_events ON t_votes.pf_e_id = t_events.p_e_id
+        WHERE t_events.baselink LIKE ?";
+        $stmt = $this->pdo->prepare($query);
+        $x = $stmt->execute([$baselink]);
+        if($x) {
+            return $stmt->fetchAll();
+        }
+        else {
+            $this->error($stmt->errorInfo()[2]);
+            return NULL;
+        }      
     }
 }
