@@ -143,7 +143,6 @@ function addTimeSlot(e) {
     finishedTimeSlot.children[0].append(document.createTextNode(startDate));
     finishedTimeSlot.children[1].append(document.createTextNode(endDate));
     collectedData.timeslots.push({ a_start: startDate, a_end: endDate });
-    console.log(collectedData);
     addButton.parentElement.remove();
     if (timeSlotID == 1) {
         var nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable");
@@ -243,7 +242,6 @@ function handleVoteInput() {
 }
 function handleOptionInput() {
     collectedData.a_end_date = endTimeInput.value + " " + endTimeHourInput.value;
-    console.log(collectedData.a_end_date);
     if (nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
@@ -258,9 +256,25 @@ function handleOptionInput() {
     }
 }
 function removeCookie(votedHash) {
-    console.log(votedHash);
     document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
-    console.log(document.cookie);
+    ajaxDeleteVotes(votedHash);
+}
+function ajaxDeleteVotes(votedHash) {
+    var params = new URLSearchParams(location.search);
+    var baselink = params.get("x");
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: { p_hashbytes: votedHash, a_baselink: baselink },
+        success: function () {
+            location.reload();
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            var loading = document.querySelector("div.loading-content");
+            loading.innerHTML = xhr.responseText;
+        }
+    });
 }
 function ajaxPullAppointment(link) {
     $.ajax({
@@ -269,7 +283,6 @@ function ajaxPullAppointment(link) {
         dataType: "json",
         data: { baselink: link },
         success: function (data) {
-            console.log(data);
             var headline = document.createElement("h1");
             headline.append(document.createTextNode(data.a_title));
             document.querySelector("div.appointment-content header").append(headline);
@@ -285,9 +298,9 @@ function ajaxPullAppointment(link) {
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);
                 var votedHash = "";
-                for (var i_1 = 0; i_1 < data.votes.length; i_1++) {
-                    if (document.cookie.indexOf(data.votes[i_1].p_hashbytes)) {
-                        votedHash = data.votes[i_1].p_hashbytes;
+                for (var j = 0; j < data.votes.length; j++) {
+                    if (document.cookie.indexOf(data.votes[j].p_hashbytes) >= 0) {
+                        votedHash = data.votes[j].p_hashbytes;
                     }
                 }
                 if (votedHash == "") {
@@ -300,13 +313,12 @@ function ajaxPullAppointment(link) {
                     document.querySelector("div.appointment-content-main-submit").classList.add("hide");
                     document.querySelector("div.appointment-content-main-delete").classList.remove("hide");
                     var button = document.querySelector("div.appointment-content-main-delete button");
-                    console.log(votedHash);
                     button.addEventListener("click", function () { removeCookie(votedHash); });
                 }
                 var count = 0;
-                for (var i_2 = 0; i_2 < data.votes.length; i_2++) {
-                    if (data.timeslots[i_2].a_start.toString() == data.votes[i_2].a_start
-                        && data.timeslots[i_2].a_end.toString() == data.votes[i_2].a_end) {
+                for (var j = 0; j < data.votes.length; j++) {
+                    if (data.timeslots[i].a_start.toString() == data.votes[j].a_start
+                        && data.timeslots[i].a_end.toString() == data.votes[j].a_end) {
                         count++;
                     }
                 }
@@ -333,7 +345,6 @@ function ajaxPushAppointment(appointment) {
         dataType: "json",
         data: appointment,
         success: function (data) {
-            console.log(data);
             history.replaceState({}, "", "?x=" + data.a_baselink);
             goTo(5);
         },

@@ -164,7 +164,6 @@ function addTimeSlot(e: Event) {
     finishedTimeSlot.children[0].append(document.createTextNode(startDate));
     finishedTimeSlot.children[1].append(document.createTextNode(endDate));
     collectedData.timeslots.push({a_start: startDate, a_end: endDate});
-    console.log(collectedData);
     addButton.parentElement.remove();
     if(timeSlotID == 1) {
         let nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable") as HTMLButtonElement;
@@ -269,7 +268,6 @@ function handleVoteInput() {
 
 function handleOptionInput() {
     collectedData.a_end_date = endTimeInput.value + " " + endTimeHourInput.value;
-    console.log(collectedData.a_end_date);
     if(nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
@@ -283,10 +281,27 @@ function handleOptionInput() {
     }
 }
 
-function removeCookie(votedHash) {
-    console.log(votedHash);
+function removeCookie(votedHash: string) {
     document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
-    console.log(document.cookie);
+    ajaxDeleteVotes(votedHash);
+}
+
+function ajaxDeleteVotes(votedHash: string) {
+    let params = new URLSearchParams(location.search);
+    let baselink = params.get("x");
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: {p_hashbytes: votedHash, a_baselink: baselink},
+        success: function() {
+            location.reload();
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            let loading = document.querySelector("div.loading-content") as HTMLDivElement;
+            loading.innerHTML = xhr.responseText;
+        }
+    });
 }
 
 function ajaxPullAppointment(link: string) {
@@ -296,7 +311,6 @@ function ajaxPullAppointment(link: string) {
         dataType: "json",
         data: {baselink:link},
         success: function(data: AppointmentData) {
-            console.log(data);
             let headline = document.createElement("h1");
             headline.append(document.createTextNode(data.a_title));
             document.querySelector("div.appointment-content header").append(headline);
@@ -312,9 +326,9 @@ function ajaxPullAppointment(link: string) {
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);
                 let votedHash = "";
-                for (let i = 0; i < data.votes.length; i++) {
-                    if (document.cookie.indexOf(data.votes[i].p_hashbytes)) {
-                        votedHash = data.votes[i].p_hashbytes;
+                for (let j = 0; j < data.votes.length; j++) {
+                    if (document.cookie.indexOf(data.votes[j].p_hashbytes) >= 0) {
+                        votedHash = data.votes[j].p_hashbytes;
                     }
                 }
                 if (votedHash == ""){
@@ -326,13 +340,12 @@ function ajaxPullAppointment(link: string) {
                     document.querySelector("div.appointment-content-main-submit").classList.add("hide");
                     document.querySelector("div.appointment-content-main-delete").classList.remove("hide");
                     let button = document.querySelector("div.appointment-content-main-delete button") as HTMLButtonElement;
-                    console.log(votedHash);
                     button.addEventListener("click", () => {removeCookie(votedHash)});
                 }
                 let count: number = 0;
-                for (let i = 0; i < data.votes.length; i++) {
-                    if (data.timeslots[i].a_start.toString() == data.votes[i].a_start 
-                        && data.timeslots[i].a_end.toString() == data.votes[i].a_end) {
+                for (let j = 0; j < data.votes.length; j++) {
+                    if (data.timeslots[i].a_start.toString() == data.votes[j].a_start 
+                        && data.timeslots[i].a_end.toString() == data.votes[j].a_end) {
                             count++;
                     }
                 }
@@ -362,7 +375,6 @@ function ajaxPushAppointment(appointment: AppointmentData) {
         dataType: "json",
         data: appointment,
         success: function(data: HashData) {
-            console.log(data);
             history.replaceState({}, "", "?x=" + data.a_baselink);
             goTo(5);
         },

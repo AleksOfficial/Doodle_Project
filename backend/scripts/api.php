@@ -88,11 +88,17 @@ if (isset($_POST['votes'])) {
     if ($hash != NULL) {
         http_response_code(200);
         debugLog($hash);
-        $hashArray['a_hashbytes'] =  $hash;
+        $hashArray['p_hashbytes'] =  $hash;
         echo json_encode($hashArray); // Eckige Klammern?
     } else {
         debugLog("fail");
         http_response_code(500);
         echo $connector->errorMessage;
     }
+}
+
+if (isset($_POST["p_hashbytes"])) {
+    $connector = new Db_create_stuff();
+    $connector->delete_vote($_POST);
+    http_response_code(200);
 }
