@@ -1,7 +1,5 @@
 interface AppointmentDate {
-    a_start: string;
     a_start_time: string;
-    a_end: string;
     a_end_time: string;
 }
 
@@ -142,21 +140,21 @@ function goTo(page: number) {
 
 function addTimeSlot(e: Event) {
     let addButton = e.target as HTMLButtonElement;
-    let startDate = new Date((addButton.parentElement.children[0].firstChild as HTMLInputElement).value
-                            + " " + (addButton.parentElement.children[0].children[1] as HTMLSelectElement).value);
-    let endDate = new Date((addButton.parentElement.children[1].firstChild as HTMLInputElement).value
-                            + " " + (addButton.parentElement.children[1].children[1] as HTMLSelectElement).value);
+    let startDate = (addButton.parentElement.children[0].firstChild as HTMLInputElement).value
+                            + " " + (addButton.parentElement.children[0].children[1] as HTMLSelectElement).value;
+    let endDate = (addButton.parentElement.children[1].firstChild as HTMLInputElement).value
+                            + " " + (addButton.parentElement.children[1].children[1] as HTMLSelectElement).value;
     let finishedTimeSlot = addButton.parentElement.parentElement.lastChild as HTMLDivElement;
     finishedTimeSlot.classList.remove("hide");
-    let startString: string = startDate.getDate() + "." + (startDate.getMonth()+1) + "." + startDate.getFullYear() + " " 
+    /*let startString: string = startDate.getDate() + "." + (startDate.getMonth()+1) + "." + startDate.getFullYear() + " " 
                 + (startDate.getHours() < 10 ? "0" : "")+ startDate.getHours() + ":" + (startDate.getMinutes() < 10 ? "0" : "") 
                 + startDate.getMinutes();
     let endString: string = endDate.getDate() + "." + (endDate.getMonth()+1) + "." + endDate.getFullYear()
                 + " " + (endDate.getHours() < 10 ? "0" : "") + endDate.getHours() + ":" + (endDate.getMinutes() < 10 ? "0" : "")
-                + endDate.getMinutes();
-    finishedTimeSlot.children[0].append(document.createTextNode(startString));
-    finishedTimeSlot.children[1].append(document.createTextNode(endString));
-    collectedData.timeslots.push({a_start: startDate, a_end: endDate});
+                + endDate.getMinutes();*/
+    finishedTimeSlot.children[0].append(document.createTextNode(startDate));
+    finishedTimeSlot.children[1].append(document.createTextNode(endDate));
+    collectedData.timeslots.push({a_start_time: startDate, a_end_time: endDate});
     addButton.parentElement.remove();
     if(timeSlotID == 1) {
         let nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable") as HTMLButtonElement;
@@ -244,7 +242,7 @@ function handleVoteInput() {
 }
 
 function handleOptionInput() {
-    collectedData.a_end_date = endTimeInput.value
+    collectedData.a_end_date = endTimeInput.value + " " + endTimeHourInput.value;
     console.log(collectedData.a_end_date);
     if(nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
         activeButton.addEventListener("click", listener);
@@ -274,9 +272,9 @@ function ajaxPullAppointment(link: string) {
                 let timeslot = newTimeSlotFinishedSlot.cloneNode(true) as HTMLDivElement;
                 timeslot.classList.remove("hide");
                 let start = timeslot.firstChild as HTMLDivElement;
-                start.append(document.createTextNode(data.timeslots[i].a_start.toString()));
+                start.append(document.createTextNode(data.timeslots[i].a_start_time.toString()));
                 let end = timeslot.children[1] as HTMLDivElement;
-                end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
+                end.append(document.createTextNode(data.timeslots[i].a_end_time.toString()));
                 let checkbox = document.createElement("input") as HTMLInputElement;
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);
