@@ -22,6 +22,7 @@ var voterNameInput;
 var voterGiven = false;
 var endTimeInput;
 var endTimeHourInput;
+var votes;
 var newTimeslot = document.createElement("div");
 var plusSign = document.createElement("div");
 newTimeslot.classList.add("timeslot", "fade-in");
@@ -136,8 +137,8 @@ function addTimeSlot(e) {
                 + endDate.getMinutes();*/
     finishedTimeSlot.children[0].append(document.createTextNode(startDate));
     finishedTimeSlot.children[1].append(document.createTextNode(endDate));
-    collectedData.timeslots.push({ a_start_time: startDate, a_end_time: endDate });
-    alert(collectedData.timeslots[0].a_end_time);
+    collectedData.timeslots.push({ a_start: startDate, a_end: endDate, a_votes: 0, p_time_id: 0 });
+    console.log(collectedData);
     addButton.parentElement.remove();
     if (timeSlotID == 1) {
         var nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable");
@@ -206,7 +207,10 @@ function voteListener(e) {
         numberOfVotes--;
     }
 }
+function pushVotes() {
+}
 function handleVoteInput() {
+    votes.a_name = voterNameInput.value;
     if (voterNameInput.value != "" && numberOfVotes > 0 && !voterGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
@@ -243,6 +247,7 @@ function ajaxPullAppointment(link) {
         dataType: "json",
         data: { baselink: link },
         success: function (data) {
+            console.log(data);
             var headline = document.createElement("h1");
             headline.append(document.createTextNode(data.a_title));
             document.querySelector("div.appointment-content header").append(headline);
@@ -251,9 +256,9 @@ function ajaxPullAppointment(link) {
                 var timeslot = newTimeSlotFinishedSlot.cloneNode(true);
                 timeslot.classList.remove("hide");
                 var start = timeslot.firstChild;
-                start.append(document.createTextNode(data.timeslots[i].a_start_time.toString()));
+                start.append(document.createTextNode(data.timeslots[i].a_start.toString()));
                 var end = timeslot.children[1];
-                end.append(document.createTextNode(data.timeslots[i].a_end_time.toString()));
+                end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
                 var checkbox = document.createElement("input");
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);
@@ -277,10 +282,24 @@ function ajaxPushAppointment(appointment) {
         dataType: "json",
         data: appointment,
         success: function (data) {
-            alert("Success");
             console.log(data);
             history.replaceState({}, "", "?x=" + data.a_baselink);
             goTo(5);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            var loading = document.querySelector("div.loading-content");
+            loading.innerHTML = xhr.responseText;
+        }
+    });
+}
+function ajaxPushVotes(votes) {
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: votes,
+        success: function (data) {
+            document.cookie = data.a_baselink + "=voted";
         },
         error: function (xhr, textStatus, errorThrown) {
             var loading = document.querySelector("div.loading-content");

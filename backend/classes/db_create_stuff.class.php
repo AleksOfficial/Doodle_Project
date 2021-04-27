@@ -70,11 +70,11 @@ class Db_create_stuff extends Db_con
     function check_timeslotdata($array)
     {
         //check if the data is set and not empty
-        if (!isset($array["a_start_time"]) || empty($array["a_start_time"])) {
+        if (!isset($array["a_start"]) || empty($array["a_start"])) {
             array_push($this->missing_data, "A start date for the timeslot.");
             $this->error_occured = true;
         }
-        if (!isset($array["a_end_time"]) || empty($array["a_end_time"])) {
+        if (!isset($array["a_end"]) || empty($array["a_end"])) {
             array_push($this->missing_data, "An end date for the timeslot.");
             $this->error_occured = true;
         }

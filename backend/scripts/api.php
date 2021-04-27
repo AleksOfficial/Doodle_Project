@@ -53,9 +53,8 @@ function responsePushAppointment($data)
 
 
 if (isset($_GET['baselink'])) {
-    
-    responsePullAppointment(getData($_GET['baselink']));
 
+    responsePullAppointment(getData($_GET['baselink']));
 }
 
 
@@ -72,4 +71,7 @@ if (isset($_POST['a_title'])) {
         http_response_code(500);
         echo $connector->errorMessage;
     }
+}
+
+if (isset($_POST['a_name'])) {
 }

@@ -1,6 +1,8 @@
 interface AppointmentDate {
-    a_start_time: string;
-    a_end_time: string;
+    a_start: string;
+    a_end: string;
+    a_votes: number;
+    p_time_id: number;
 }
 
 interface AppointmentData {
@@ -37,6 +39,7 @@ var voterNameInput: HTMLInputElement;
 var voterGiven = false;
 var endTimeInput: HTMLInputElement;
 var endTimeHourInput: HTMLSelectElement;
+var votes: Votes;
 
 var newTimeslot = document.createElement("div") as HTMLDivElement;
 var plusSign = document.createElement("div") as HTMLDivElement;
@@ -154,8 +157,8 @@ function addTimeSlot(e: Event) {
                 + endDate.getMinutes();*/
     finishedTimeSlot.children[0].append(document.createTextNode(startDate));
     finishedTimeSlot.children[1].append(document.createTextNode(endDate));
-    collectedData.timeslots.push({a_start_time: startDate, a_end_time: endDate});
-    alert(collectedData.timeslots[0].a_end_time);
+    collectedData.timeslots.push({a_start: startDate, a_end: endDate, a_votes: 0, p_time_id: 0});
+    console.log(collectedData);
     addButton.parentElement.remove();
     if(timeSlotID == 1) {
         let nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable") as HTMLButtonElement;
@@ -228,7 +231,12 @@ function voteListener(e: Event) {
     }
 }
 
+function pushVotes() {
+    
+}
+
 function handleVoteInput() {
+    votes.a_name = voterNameInput.value;
     if(voterNameInput.value != "" && numberOfVotes > 0 && !voterGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
@@ -265,6 +273,7 @@ function ajaxPullAppointment(link: string) {
         dataType: "json",
         data: {baselink:link},
         success: function(data: AppointmentData) {
+            console.log(data);
             let headline = document.createElement("h1");
             headline.append(document.createTextNode(data.a_title));
             document.querySelector("div.appointment-content header").append(headline);
@@ -273,9 +282,9 @@ function ajaxPullAppointment(link: string) {
                 let timeslot = newTimeSlotFinishedSlot.cloneNode(true) as HTMLDivElement;
                 timeslot.classList.remove("hide");
                 let start = timeslot.firstChild as HTMLDivElement;
-                start.append(document.createTextNode(data.timeslots[i].a_start_time.toString()));
+                start.append(document.createTextNode(data.timeslots[i].a_start.toString()));
                 let end = timeslot.children[1] as HTMLDivElement;
-                end.append(document.createTextNode(data.timeslots[i].a_end_time.toString()));
+                end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
                 let checkbox = document.createElement("input") as HTMLInputElement;
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);
@@ -305,10 +314,34 @@ function ajaxPushAppointment(appointment: AppointmentData) {
         dataType: "json",
         data: appointment,
         success: function(data: HashData) {
-            alert("Success");
             console.log(data);
             history.replaceState({}, "", "?x=" + data.a_baselink);
             goTo(5);
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            let loading = document.querySelector("div.loading-content") as HTMLDivElement;
+            loading.innerHTML = xhr.responseText;
+        }
+    });
+}
+
+interface Votes {
+    votes: Vote[];
+    a_name: string;
+}
+
+interface Vote {
+    pf_time_id: number;
+}
+
+function ajaxPushVotes(votes: Votes) {
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: votes,
+        success: function(data: HashData) {
+            document.cookie = data.a_baselink + "=voted";
         },
         error: function(xhr, textStatus, errorThrown) {
             let loading = document.querySelector("div.loading-content") as HTMLDivElement;

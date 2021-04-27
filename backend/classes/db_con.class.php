@@ -62,8 +62,8 @@ abstract class Db_con
   {
     $timeslot = [];
     $appointment[0] = $array["f_e_id"];
-    $appointment[1] = $array["a_start_time"];
-    $appointment[2] = $array["a_end_time"];
+    $appointment[1] = $array["a_start"];
+    $appointment[2] = $array["a_end"];
     return $appointment;
   }
   function convert_to_vote($array)
