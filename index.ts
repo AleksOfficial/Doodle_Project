@@ -1,8 +1,6 @@
 interface AppointmentDate {
     a_start: string;
     a_end: string;
-    a_votes: number;
-    p_time_id: number;
 }
 
 interface AppointmentData {
@@ -13,6 +11,7 @@ interface AppointmentData {
     a_creator_email: string;
     a_end_date: string;
     timeslots: AppointmentDate[];
+    votes: Votes;
 }
 
 var collectedData: AppointmentData = {
@@ -22,8 +21,10 @@ var collectedData: AppointmentData = {
     a_creator_name: "",
     a_creator_email: "",
     a_end_date: null,
-    timeslots: []
+    timeslots: [],
+    votes: {votes: []}
 }
+
 var divs: HTMLDivElement[] = [];
 var mainBox: HTMLDivElement;
 var nameInput: HTMLInputElement;
@@ -40,6 +41,10 @@ var voterGiven = false;
 var endTimeInput: HTMLInputElement;
 var endTimeHourInput: HTMLSelectElement;
 var votes: Votes;
+
+votes = {
+    votes: []
+}
 
 var newTimeslot = document.createElement("div") as HTMLDivElement;
 var plusSign = document.createElement("div") as HTMLDivElement;
@@ -157,7 +162,7 @@ function addTimeSlot(e: Event) {
                 + endDate.getMinutes();*/
     finishedTimeSlot.children[0].append(document.createTextNode(startDate));
     finishedTimeSlot.children[1].append(document.createTextNode(endDate));
-    collectedData.timeslots.push({a_start: startDate, a_end: endDate, a_votes: 0, p_time_id: 0});
+    collectedData.timeslots.push({a_start: startDate, a_end: endDate});
     console.log(collectedData);
     addButton.parentElement.remove();
     if(timeSlotID == 1) {
@@ -232,18 +237,26 @@ function voteListener(e: Event) {
 }
 
 function pushVotes() {
-    
+    let timeslots = document.querySelector("div.appointment-content-main-vote") as HTMLDivElement;
+    for (let i = 0; i < timeslots.children.length; i++) {
+        let child = timeslots.children[i];
+        let checkbox = (child.children[2] as HTMLDivElement).firstChild as HTMLInputElement;
+        if (checkbox.checked){
+            votes.votes.push({a_name: voterNameInput.value, a_start: child.children[0].textContent,
+                            a_end: child.children[1].textContent, a_hashbytes: ""});
+        }
+    }
+    ajaxPushVotes(votes);
 }
 
 function handleVoteInput() {
-    votes.a_name = voterNameInput.value;
     if(voterNameInput.value != "" && numberOfVotes > 0 && !voterGiven) {
-        activeButton.addEventListener("click", listener);
+        activeButton.addEventListener("click", pushVotes);
         activeButton.classList.add("button-clickable");
         activeButton.classList.remove("button-unclickable");
         voterGiven = true;
     } else if ((voterNameInput.value == "" || numberOfVotes <= 0) && voterGiven) {
-        activeButton.removeEventListener("click", listener);
+        activeButton.removeEventListener("click", pushVotes);
         activeButton.classList.add("button-unclickable");
         activeButton.classList.remove("button-clickable");
         voterGiven = false;
@@ -325,13 +338,15 @@ function ajaxPushAppointment(appointment: AppointmentData) {
     });
 }
 
-interface Votes {
-    votes: Vote[];
+interface Vote {
+    a_start: string;
+    a_end:string;
     a_name: string;
+    a_hashbytes: string;
 }
 
-interface Vote {
-    pf_time_id: number;
+interface Votes {
+    votes: Vote[];
 }
 
 function ajaxPushVotes(votes: Votes) {

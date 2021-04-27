@@ -5,7 +5,8 @@ var collectedData = {
     a_creator_name: "",
     a_creator_email: "",
     a_end_date: null,
-    timeslots: []
+    timeslots: [],
+    votes: { votes: [] }
 };
 var divs = [];
 var mainBox;
@@ -23,6 +24,9 @@ var voterGiven = false;
 var endTimeInput;
 var endTimeHourInput;
 var votes;
+votes = {
+    votes: []
+};
 var newTimeslot = document.createElement("div");
 var plusSign = document.createElement("div");
 newTimeslot.classList.add("timeslot", "fade-in");
@@ -137,7 +141,7 @@ function addTimeSlot(e) {
                 + endDate.getMinutes();*/
     finishedTimeSlot.children[0].append(document.createTextNode(startDate));
     finishedTimeSlot.children[1].append(document.createTextNode(endDate));
-    collectedData.timeslots.push({ a_start: startDate, a_end: endDate, a_votes: 0, p_time_id: 0 });
+    collectedData.timeslots.push({ a_start: startDate, a_end: endDate });
     console.log(collectedData);
     addButton.parentElement.remove();
     if (timeSlotID == 1) {
@@ -208,17 +212,26 @@ function voteListener(e) {
     }
 }
 function pushVotes() {
+    var timeslots = document.querySelector("div.appointment-content-main-vote");
+    for (var i = 0; i < timeslots.children.length; i++) {
+        var child = timeslots.children[i];
+        var checkbox = child.children[2].firstChild;
+        if (checkbox.checked) {
+            votes.votes.push({ a_name: voterNameInput.value, a_start: child.children[0].textContent,
+                a_end: child.children[1].textContent, a_hashbytes: "" });
+        }
+    }
+    ajaxPushVotes(votes);
 }
 function handleVoteInput() {
-    votes.a_name = voterNameInput.value;
     if (voterNameInput.value != "" && numberOfVotes > 0 && !voterGiven) {
-        activeButton.addEventListener("click", listener);
+        activeButton.addEventListener("click", pushVotes);
         activeButton.classList.add("button-clickable");
         activeButton.classList.remove("button-unclickable");
         voterGiven = true;
     }
     else if ((voterNameInput.value == "" || numberOfVotes <= 0) && voterGiven) {
-        activeButton.removeEventListener("click", listener);
+        activeButton.removeEventListener("click", pushVotes);
         activeButton.classList.add("button-unclickable");
         activeButton.classList.remove("button-clickable");
         voterGiven = false;
