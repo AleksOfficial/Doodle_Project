@@ -192,16 +192,10 @@ class Db_create_stuff extends Db_con
 
     function create_vote($array)
     {
-        
-        var_dump($array);
-        if(!isset($array["a_hashbytes"]) || empty($array["a_hashbytes"]))
-            $hashbytes = $this->create_hashbytes("p_hashbytes", "t_votes");
-        else
-            $hashbytes = $array["a_hashbytes"];
-
+        $hashbytes = $this->create_hashbytes("p_hashbytes", "t_votes");
         if (isset($array["votes"]) && !empty($array["votes"])) {
             foreach ($array["votes"] as $vote) {
-                //$vote["a_baselink"] = $array["a_baselink"];
+                $vote["a_baselink"] = $array["a_baselink"];
                 $vote["p_hashbytes"] = $hashbytes;
                 if ($this->check_votedata($vote)) {
                     //Insert the vote 
@@ -223,21 +217,13 @@ class Db_create_stuff extends Db_con
     //Deselect an option function 
     function delete_vote($array)
     {
-        if((isset($array["votes"]) && !empty($array["votes"])) && (isset($array["a_hashbytes"]) && !empty($array["a_hashbytes"])))
-        {
-            foreach($array["votes"] as $vote)
-            {
-                $vote["a_hashbytes"] = $array["a_hashbytes"];
-                $vote["a_baselink"] = $array["a_baselink"];
-                if ($this->check_votedata($vote)) {
-                    $vote = $this->convert_to_vote($vote);
-                    $query = "DELETE 
-                              FROM t_votes 
-                              WHERE p_hashbytes LIKE ? AND pf_e_id = ? AND pf_time_id = ? AND a_name LIKE ?";
-                    $stmt = $this->pdo->prepare($query);
-                    $stmt->execute($vote);
-                }
-            }
+        if ($this->check_votedata($array)) {
+            $vote = $this->convert_to_vote($array);
+            $query = "DELETE 
+                      FROM t_votes 
+                      WHERE pf_e_id = ? AND pf_time_id = ? AND a_name LIKE ?";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($vote);
         }
     }
 
