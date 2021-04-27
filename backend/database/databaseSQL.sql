@@ -7,7 +7,6 @@ CREATE DATABASE doodle_project;
   - t_invites
   - t_events
   - t_timeslots
-  - t_hashbytes
 
 fields:
 a_* = Attribute
@@ -56,10 +55,11 @@ CREATE TABLE t_timeslots(
 */
 
 CREATE TABLE t_votes(
-  pf_i_id INTEGER NOT NULL,
+  pf_e_id INTEGER NOT NULL,
   pf_time_id INTEGER NOT NULL,
+  p_hashbytes VARCHAR(64) NOT NULL,
   a_name VARCHAR(64),
-  CONSTRAINT PK_votes PRIMARY KEY(pf_i_id, pf_time_id)
+  CONSTRAINT PK_votes PRIMARY KEY(pf_e_id, pf_time_id, p_hashbytes)
 );
 -- Creating Foreign Keys
 
@@ -74,4 +74,10 @@ ALTER TABLE t_timeslots
 
 ALTER TABLE t_votes
   ADD CONSTRAINT FK_votes_timeslots FOREIGN KEY(pf_time_id) REFERENCES t_timeslots(p_time_id) ON DELETE CASCADE,
-  ADD CONSTRAINT FK_votes_invites FOREIGN KEY(pf_i_id) REFERENCES t_invites(p_i_id) ON DELETE CASCADE;
+  ADD CONSTRAINT FK_votes_invites FOREIGN KEY(pf_e_id) REFERENCES t_events(p_e_id) ON DELETE CASCADE;
+
+-- Creating Indices
+CREATE INDEX e_baselink ON t_events(a_baselink);
+CREATE INDEX time_start ON t_timeslots(a_start);
+CREATE INDEX time_end ON t_timeslots(a_end);
+CREATE INDEX votes_hashbytes ON t_votes(p_hashbytes);
