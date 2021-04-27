@@ -53,8 +53,11 @@ function responsePushAppointment($data)
 
 
 if (isset($_GET['baselink'])) {
+    
     responsePullAppointment(getData($_GET['baselink']));
+
 }
+
 
 if (isset($_POST['a_title'])) {
     /*var_dump($_POST);

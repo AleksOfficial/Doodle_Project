@@ -117,10 +117,18 @@ class Db_create_stuff extends Db_con
         if ($this->check_timeslotdata($timeslot)) {
             $timeslot["f_e_id"] = $foreign_key;
             $query = "INSERT INTO t_timeslots (f_e_id,a_start,a_end) 
-                VALUES(STR_TO_DATE(?,'%Y-%m-%d %h:%i'),STR_TO_DATE(?,'%Y-%m-%d %h:%i'),?)";
+                VALUES(?,STR_TO_DATE(?,'%Y-%m-%d %H:%i'),STR_TO_DATE(?,'%Y-%m-%d %H:%i'))";
             $stmt = $this->pdo->prepare($query);
             $timeslot = $this->convert_to_timeslot($timeslot);
-            $stmt->execute($timeslot);
+            $x = $stmt->execute($timeslot);
+            if($x)
+            {
+                return true;
+            }
+            else{
+                $this->error($stmt->errorInfo()[2]);
+                return false;
+            }
         }
     }
     //create invites
@@ -160,7 +168,7 @@ class Db_create_stuff extends Db_con
             //Create appointment
             $appointment = $this->convert_to_appointment($array);
             $query = "INSERT INTO t_events (a_end_date,a_creator_name,a_creator_email,a_baselink,a_title, a_location, a_description) 
-                VALUES (STR_TO_DATE(?,'%Y-%m-%d %h:%i'),?,?,?,?,?,?);";
+                VALUES (STR_TO_DATE(?,'%Y-%m-%d %H:%i'),?,?,?,?,?,?);";
             $stmt = $this->pdo->prepare($query);
             $x = $stmt->execute($appointment);
 
