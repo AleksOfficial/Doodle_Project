@@ -24,7 +24,6 @@ var voterGiven = false;
 var endTimeInput;
 var endTimeHourInput;
 var votes;
-var votedHash;
 votes = {
     a_baselink: "",
     votes: []
@@ -220,7 +219,7 @@ function pushVotes() {
         var checkbox = child.children[2].firstChild;
         if (checkbox.checked) {
             votes.votes.push({ a_name: voterNameInput.value, a_start: child.children[0].textContent,
-                a_end: child.children[1].textContent, a_hashbytes: "" });
+                a_end: child.children[1].textContent, p_hashbytes: "" });
         }
     }
     var params = new URLSearchParams(location.search);
@@ -258,6 +257,11 @@ function handleOptionInput() {
         nameAndEndTimeGiven = false;
     }
 }
+function removeCookie(votedHash) {
+    console.log(votedHash);
+    document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
+    console.log(document.cookie);
+}
 function ajaxPullAppointment(link) {
     $.ajax({
         type: "get",
@@ -270,7 +274,7 @@ function ajaxPullAppointment(link) {
             headline.append(document.createTextNode(data.a_title));
             document.querySelector("div.appointment-content header").append(headline);
             var vote = document.querySelector("div.appointment-content-main-vote");
-            for (var i = 0; i < data.timeslots.length; i++) {
+            var _loop_1 = function (i) {
                 var timeslot = newTimeSlotFinishedSlot.cloneNode(true);
                 timeslot.classList.remove("hide");
                 var start = timeslot.firstChild;
@@ -280,10 +284,10 @@ function ajaxPullAppointment(link) {
                 var checkbox = document.createElement("input");
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);
-                votedHash = "";
+                var votedHash = "";
                 for (var i_1 = 0; i_1 < data.votes.length; i_1++) {
-                    if (document.cookie.indexOf(data.votes[i_1].a_hashbytes)) {
-                        votedHash = data.votes[i_1].a_hashbytes;
+                    if (document.cookie.indexOf(data.votes[i_1].p_hashbytes)) {
+                        votedHash = data.votes[i_1].p_hashbytes;
                     }
                 }
                 if (votedHash == "") {
@@ -296,11 +300,8 @@ function ajaxPullAppointment(link) {
                     document.querySelector("div.appointment-content-main-submit").classList.add("hide");
                     document.querySelector("div.appointment-content-main-delete").classList.remove("hide");
                     var button = document.querySelector("div.appointment-content-main-delete button");
-                    button.addEventListener("click", function () {
-                        console.log(votedHash);
-                        document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
-                        console.log(document.cookie);
-                    });
+                    console.log(votedHash);
+                    button.addEventListener("click", function () { removeCookie(votedHash); });
                 }
                 var count = 0;
                 for (var i_2 = 0; i_2 < data.votes.length; i_2++) {
@@ -314,6 +315,9 @@ function ajaxPullAppointment(link) {
                 countDiv.append(document.createTextNode("Votes: " + count.toString()));
                 timeslot.append(countDiv);
                 vote.append(timeslot);
+            };
+            for (var i = 0; i < data.timeslots.length; i++) {
+                _loop_1(i);
             }
         },
         error: function (xhr, textStatus, errorThrown) {
@@ -346,7 +350,7 @@ function ajaxPushVotes(votes) {
         dataType: "json",
         data: votes,
         success: function (data) {
-            document.cookie = data.a_hashbytes + "=voted";
+            document.cookie = data.p_hashbytes + "=voted";
             location.reload();
         },
         error: function (xhr, textStatus, errorThrown) {

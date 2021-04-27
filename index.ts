@@ -41,7 +41,6 @@ var voterGiven = false;
 var endTimeInput: HTMLInputElement;
 var endTimeHourInput: HTMLSelectElement;
 var votes: Votes;
-var votedHash: string;
 
 votes = {
     a_baselink : "",
@@ -245,7 +244,7 @@ function pushVotes() {
         let checkbox = (child.children[2] as HTMLDivElement).firstChild as HTMLInputElement;
         if (checkbox.checked){
             votes.votes.push({a_name: voterNameInput.value, a_start: child.children[0].textContent,
-                            a_end: child.children[1].textContent, a_hashbytes: ""});
+                            a_end: child.children[1].textContent, p_hashbytes: ""});
         }
     }
     let params = new URLSearchParams(location.search);
@@ -284,6 +283,12 @@ function handleOptionInput() {
     }
 }
 
+function removeCookie(votedHash) {
+    console.log(votedHash);
+    document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
+    console.log(document.cookie);
+}
+
 function ajaxPullAppointment(link: string) {
     $.ajax({
         type: "get",
@@ -306,10 +311,10 @@ function ajaxPullAppointment(link: string) {
                 let checkbox = document.createElement("input") as HTMLInputElement;
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);
-                votedHash = "";
+                let votedHash = "";
                 for (let i = 0; i < data.votes.length; i++) {
-                    if (document.cookie.indexOf(data.votes[i].a_hashbytes)) {
-                        votedHash = data.votes[i].a_hashbytes;
+                    if (document.cookie.indexOf(data.votes[i].p_hashbytes)) {
+                        votedHash = data.votes[i].p_hashbytes;
                     }
                 }
                 if (votedHash == ""){
@@ -321,11 +326,8 @@ function ajaxPullAppointment(link: string) {
                     document.querySelector("div.appointment-content-main-submit").classList.add("hide");
                     document.querySelector("div.appointment-content-main-delete").classList.remove("hide");
                     let button = document.querySelector("div.appointment-content-main-delete button") as HTMLButtonElement;
-                    button.addEventListener("click", () => {
-                        console.log(votedHash);
-                        document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
-                        console.log(document.cookie);
-                    })
+                    console.log(votedHash);
+                    button.addEventListener("click", () => {removeCookie(votedHash)});
                 }
                 let count: number = 0;
                 for (let i = 0; i < data.votes.length; i++) {
@@ -375,7 +377,7 @@ interface Vote {
     a_start: string;
     a_end:string;
     a_name: string;
-    a_hashbytes: string;
+    p_hashbytes: string;
 }
 
 interface Votes {
@@ -384,7 +386,7 @@ interface Votes {
 }
 
 interface HashDataVote {
-    a_hashbytes: string;
+    p_hashbytes: string;
 }
 
 function ajaxPushVotes(votes: Votes) {
@@ -394,7 +396,7 @@ function ajaxPushVotes(votes: Votes) {
         dataType: "json",
         data: votes,
         success: function(data: HashDataVote) {
-            document.cookie = data.a_hashbytes + "=voted";
+            document.cookie = data.p_hashbytes + "=voted";
             location.reload();
         },
         error: function(xhr, textStatus, errorThrown) {
