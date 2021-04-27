@@ -217,13 +217,20 @@ class Db_create_stuff extends Db_con
     //Deselect an option function 
     function delete_vote($array)
     {
-        if ($this->check_votedata($array)) {
-            $vote = $this->convert_to_vote($array);
+        //Delete with the hashbytes stored in the cookie
+        if(isset($array["p_hashbytes"]) && !empty($array["p_hashbytes"]))
+        {
             $query = "DELETE 
                       FROM t_votes 
-                      WHERE pf_e_id = ? AND pf_time_id = ? AND a_name LIKE ?";
+                      WHERE p_hashbytes LIKE ?";
             $stmt = $this->pdo->prepare($query);
-            $stmt->execute($vote);
+            $x = $stmt->execute($array["p_hashbytes"]);
+            if($x)
+                return true;
+            else{
+                $this->error($stmt->errorInfo()[2]);
+                return NULL;
+            }
         }
     }
 

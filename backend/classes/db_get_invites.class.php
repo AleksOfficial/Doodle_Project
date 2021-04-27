@@ -33,9 +33,11 @@ class DB_get_invites extends Db_con
   public function get_invites($e_id)
   {
     $con = $this->connect();
-    $query = "SELECT t_invites.
+    $query = "SELECT *
     FROM t_invites 
-    WHERE f_e_id = ? INNER JOIN t_invites.f_m_id ON t_mail.p_m_id as Recipient INNER JOIN  ";
+    INNER JOIN t_events ON t_invites.f_e_id = t_events.p_e_id
+    WHERE f_e_id = ?";
+    
     $stmt = $con->prepare($query);
     $x = $stmt->execute([$e_id]);
     
@@ -48,6 +50,11 @@ class DB_get_invites extends Db_con
       $this->error($stmt->errorInfo()[2]);
       return NULL;
     }
+  }
+
+  public function get_invite_maillist()
+  {
+    
   }
 
 

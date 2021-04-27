@@ -4,10 +4,10 @@ class Sending_mails
 {
   
   //Create Method sends the message with a hashtoken & type of mail. Returns the mail
-  public function generate_mail($url_token, $mail_type,$creator_name = NULL)
+  public function generate_mail($url_token, $mail_type,$creator_name = NULL,$recipient_mail)
   {
-
-    $content = $this->get_content($url_token, $mail_type,$creator_name);
+    $subject = "";
+    $content = $this->get_content($url_token, $mail_type,$creator_name,$subject);
     $mail = new PHPMailer();
     $mail->isSMTP();
     $mail->SMTPOptions = array(
@@ -23,28 +23,36 @@ class Sending_mails
     $mail->SMTPAuth = true;
     $mail->Username = 'myfirstpythonscript28@gmail.com';
     $mail->Password = 'Y2GdLZb7HnKsUrB';
-    $mail->setFrom('myfirstpythonscript28@gmail.com', 'Doodle Clone - Appointment');
-    $mail->addAddress($user['email']);
-    $mail->Subject = 'RIFT Account: Password-Reset';
+    $mail->setFrom('myfirstpythonscript28@gmail.com', 'Doodle Clone - Appointment Finder');
+    $mail->addAddress($recipient_mail);
+    $mail->Subject = $subject;
     $mail->msgHTML($content);
     return $mail;
-
   }
 
-  public function get_content($url_token, $mail_type, $creator_name = NULL)
+  public function get_content($url_token, $mail_type, $creator_name = NULL, &$subject)
   {
     $url_token = "localhost/doodle_project/index.html?".$url_token;
     if($mail_type === "invite")
     {
       $content = file_get_contents("../emails/email_invite.1php");
       $content = str_replace("{{name}}",$creator_name,$content);
+      $subject = "Doodle Clone: You received a new Appointment from $creator_name!";
     }
-    if($mail_type === "created")
-    $content = file_get_contents("../emails/email_created.php");
+    if($mail_type === "created"){
+      $content = file_get_contents("../emails/email_created.php");
+      $subject = "Doodle Clone: You created a new event! Congrats!";
+    }
     if($mail_type === "almost_closed")
-    $content = file_get_contents("../emails/email_poll_almost_closed.php");
+    {
+      $content = file_get_contents("../emails/email_poll_almost_closed.php");
+      $subject = "Doodle Clone: A Poll you have been invited to is ending in 5 minutes!";
+    }
     if($mail_type === "closed")
-    $content = file_get_contents("../emails/email_poll_closed.php");
+    {
+      $content = file_get_contents("../emails/email_poll_closed.php");
+      $subject = "Doodle Clone: Poll closed - View the result here!";
+    }
     $content = str_replace("{{action_url}}", $url_token, $content);
     return $content;
   }
