@@ -1,17 +1,16 @@
 <?php
-
+/*
 function debugLog(string $log)
 {
     file_put_contents("debug.txt", $log);
 }
-
+*/
 class Db_create_stuff extends Db_con
 {
     //It would probably be nice to have some form of error class instead of handling the errors everywhere individually with each function
     //Then you'd have a consistent error handling. Lack of time makes this quite difficult tho. We might come back to this at some point
 
     public $errorMessage = "";
-    private $pdo;
     private $error_occured;
     private $error_missing;
     private $missing_data = [];
@@ -125,11 +124,9 @@ class Db_create_stuff extends Db_con
             $stmt = $this->pdo->prepare($query);
             $timeslot = $this->convert_to_timeslot($timeslot);
             $x = $stmt->execute($timeslot);
-            if($x)
-            {
+            if ($x) {
                 return true;
-            }
-            else{
+            } else {
                 $this->error($stmt->errorInfo()[2]);
                 return false;
             }
@@ -154,8 +151,8 @@ class Db_create_stuff extends Db_con
         if ($this->check_appointmentdata($array)) {
 
             //All data is set, create Hashbytes
-            $array["a_baselink"] = $this->create_hashbytes("a_baselink","t_events");
-            if($array["a_baselink"] == NULL)
+            $array["a_baselink"] = $this->create_hashbytes("a_baselink", "t_events");
+            if ($array["a_baselink"] == NULL)
                 return NULL;
             //Create appointment
             $appointment = $this->convert_to_appointment($array);
@@ -191,29 +188,28 @@ class Db_create_stuff extends Db_con
         return NULL;
     }
 
-    
+
 
     function create_vote($array)
     {
-        $hashbytes = $this->create_hashbytes("p_hashbytes","t_votes");
-        if(isset($array["votes"]) && !empty($array["votes"]))
-        { 
-            foreach($array["votes"] as $vote)
-            {
+        $hashbytes = $this->create_hashbytes("p_hashbytes", "t_votes");
+        if (isset($array["votes"]) && !empty($array["votes"])) {
+            foreach ($array["votes"] as $vote) {
+                $vote["a_baselink"] = $array["a_baselink"];
                 $vote["p_hashbytes"] = $hashbytes;
-                if ($this->check_votedata($array)) {
+                if ($this->check_votedata($vote)) {
                     //Insert the vote 
-                    $vote = $this->convert_to_vote($array); //This thing does more than it seems. it retrieves the event id and Time id
+                    $vote = $this->convert_to_vote($vote); //This thing does more than it seems. it retrieves the event id and Time id
                     $insert_query = "INSERT INTO t_votes (p_hashbytes,pf_e_id, pf_time_id, a_name) VALUES(?,?,?,?);";
                     $stmt = $this->pdo->prepare($insert_query);
-                    $x = $stmt = $this->pdo->prepare($insert_query);
+                    $x = $stmt->execute($vote);
                     if (!$x) {
                         $this->error($stmt->errorInfo()[2]);
                         return NULL;
                     }
                 }
             }
-
+            return $hashbytes;
         }
     }
 
@@ -231,27 +227,23 @@ class Db_create_stuff extends Db_con
         }
     }
 
-    function create_hashbytes($field,$table)
+    function create_hashbytes($field, $table)
     {
-        while(42)
-        {
+        while (42) {
             $hashbytes = bin2hex(random_bytes(32));
-                //check if the hashbytes are in the database
-                $query = "SELECT ".$field." FROM ".$table." WHERE ".$field." LIKE ?";
-                $stmt = $this->pdo->prepare($query);
-                $x = $stmt->execute([$hashbytes]);
-                if ($x) {
-                    if ($stmt->fetch() == NULL)
-                        break;
-                } else {
-                    $this->error($stmt->errorInfo()[2]);
-                    http_response_code(500);
-                    return NULL;
-                }
+            //check if the hashbytes are in the database
+            $query = "SELECT " . $field . " FROM " . $table . " WHERE " . $field . " LIKE ?";
+            $stmt = $this->pdo->prepare($query);
+            $x = $stmt->execute([$hashbytes]);
+            if ($x) {
+                if ($stmt->fetch() == NULL)
+                    break;
+            } else {
+                $this->error($stmt->errorInfo()[2]);
+                http_response_code(500);
+                return NULL;
+            }
         }
         return $hashbytes;
     }
-
-
-
 }

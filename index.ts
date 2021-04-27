@@ -22,7 +22,7 @@ var collectedData: AppointmentData = {
     a_creator_email: "",
     a_end_date: null,
     timeslots: [],
-    votes: {votes: []}
+    votes: {a_baselink: "", votes: []}
 }
 
 var divs: HTMLDivElement[] = [];
@@ -43,6 +43,7 @@ var endTimeHourInput: HTMLSelectElement;
 var votes: Votes;
 
 votes = {
+    a_baselink : "",
     votes: []
 }
 
@@ -246,6 +247,8 @@ function pushVotes() {
                             a_end: child.children[1].textContent, a_hashbytes: ""});
         }
     }
+    let params = new URLSearchParams(location.search);
+    votes.a_baselink = params.get("x");
     ajaxPushVotes(votes);
 }
 
@@ -346,7 +349,12 @@ interface Vote {
 }
 
 interface Votes {
+    a_baselink: string;
     votes: Vote[];
+}
+
+interface HashDataVote {
+    a_hashbytes: string;
 }
 
 function ajaxPushVotes(votes: Votes) {
@@ -355,8 +363,9 @@ function ajaxPushVotes(votes: Votes) {
         url: "backend/scripts/api.php",
         dataType: "json",
         data: votes,
-        success: function(data: HashData) {
-            document.cookie = data.a_baselink + "=voted";
+        success: function(data: HashDataVote) {
+            console.log(data);
+            document.cookie = data.a_hashbytes + "=voted";
         },
         error: function(xhr, textStatus, errorThrown) {
             let loading = document.querySelector("div.loading-content") as HTMLDivElement;

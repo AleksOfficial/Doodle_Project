@@ -6,7 +6,7 @@ var collectedData = {
     a_creator_email: "",
     a_end_date: null,
     timeslots: [],
-    votes: { votes: [] }
+    votes: { a_baselink: "", votes: [] }
 };
 var divs = [];
 var mainBox;
@@ -25,6 +25,7 @@ var endTimeInput;
 var endTimeHourInput;
 var votes;
 votes = {
+    a_baselink: "",
     votes: []
 };
 var newTimeslot = document.createElement("div");
@@ -221,6 +222,8 @@ function pushVotes() {
                 a_end: child.children[1].textContent, a_hashbytes: "" });
         }
     }
+    var params = new URLSearchParams(location.search);
+    votes.a_baselink = params.get("x");
     ajaxPushVotes(votes);
 }
 function handleVoteInput() {
@@ -312,7 +315,8 @@ function ajaxPushVotes(votes) {
         dataType: "json",
         data: votes,
         success: function (data) {
-            document.cookie = data.a_baselink + "=voted";
+            console.log(data);
+            document.cookie = data.a_hashbytes + "=voted";
         },
         error: function (xhr, textStatus, errorThrown) {
             var loading = document.querySelector("div.loading-content");

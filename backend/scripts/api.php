@@ -1,4 +1,12 @@
 <?php
+
+
+function debugLog(string $log)
+{
+    file_put_contents("debug.txt", $log);
+}
+
+
 spl_autoload_register(function ($class) {
     include_once "../classes/" . $class . ".class.php";
 });
@@ -73,5 +81,18 @@ if (isset($_POST['a_title'])) {
     }
 }
 
-if (isset($_POST['a_name'])) {
+if (isset($_POST['votes'])) {
+    $connector = new Db_create_stuff();
+    $hash = $connector->create_vote($_POST);
+    debugLog("blabla");
+    if ($hash != NULL) {
+        http_response_code(200);
+        debugLog($hash);
+        $hashArray['a_hashbytes'] =  $hash;
+        echo json_encode($hashArray); // Eckige Klammern?
+    } else {
+        debugLog("fail");
+        http_response_code(500);
+        echo $connector->errorMessage;
+    }
 }

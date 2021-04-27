@@ -1,7 +1,6 @@
 <?php
 class Db_get_appointments extends Db_con
 {
-    private $pdo;
 
     function __construct()
     {

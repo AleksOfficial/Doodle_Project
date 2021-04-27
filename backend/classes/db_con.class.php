@@ -6,6 +6,7 @@ abstract class Db_con
   private $user = "hello_world";
   private $pwd = "123";
   private $dbName = "doodle_project";
+  protected $pdo;
 
   protected function connect()
   {
@@ -75,7 +76,7 @@ abstract class Db_con
     $start_time = $array["a_start"];
     $end_time = $array["a_end"];
     //Get ID from the event
-    $id_query = "SELECT p_e_id FROM t_events WHERE a_baselink LIKE = ?";
+    $id_query = "SELECT p_e_id FROM t_events WHERE a_baselink LIKE ?";
     $stmt = $this->pdo->prepare($id_query);
     $x = $stmt->execute([$baselink]);
     if ($x) {
@@ -107,6 +108,6 @@ abstract class Db_con
       $this->error($stmt->errorInfo()[2]);
       return NULL;
     }
-    return [$hashbytes,$e_id, $time_id, $name];
+    return [$hashbytes, $e_id, $time_id, $name];
   }
 }
