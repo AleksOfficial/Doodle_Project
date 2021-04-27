@@ -155,6 +155,7 @@ function addTimeSlot(e: Event) {
     finishedTimeSlot.children[0].append(document.createTextNode(startDate));
     finishedTimeSlot.children[1].append(document.createTextNode(endDate));
     collectedData.timeslots.push({a_start_time: startDate, a_end_time: endDate});
+    alert(collectedData.timeslots[0].a_end_time);
     addButton.parentElement.remove();
     if(timeSlotID == 1) {
         let nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable") as HTMLButtonElement;

@@ -122,21 +122,22 @@ function goTo(page) {
 }
 function addTimeSlot(e) {
     var addButton = e.target;
-    var startDate = new Date(addButton.parentElement.children[0].firstChild.value
-        + " " + addButton.parentElement.children[0].children[1].value);
-    var endDate = new Date(addButton.parentElement.children[1].firstChild.value
-        + " " + addButton.parentElement.children[1].children[1].value);
+    var startDate = addButton.parentElement.children[0].firstChild.value
+        + " " + addButton.parentElement.children[0].children[1].value;
+    var endDate = addButton.parentElement.children[1].firstChild.value
+        + " " + addButton.parentElement.children[1].children[1].value;
     var finishedTimeSlot = addButton.parentElement.parentElement.lastChild;
     finishedTimeSlot.classList.remove("hide");
-    var startString = startDate.getDate() + "." + (startDate.getMonth() + 1) + "." + startDate.getFullYear() + " "
-        + (startDate.getHours() < 10 ? "0" : "") + startDate.getHours() + ":" + (startDate.getMinutes() < 10 ? "0" : "")
-        + startDate.getMinutes();
-    var endString = endDate.getDate() + "." + (endDate.getMonth() + 1) + "." + endDate.getFullYear()
-        + " " + (endDate.getHours() < 10 ? "0" : "") + endDate.getHours() + ":" + (endDate.getMinutes() < 10 ? "0" : "")
-        + endDate.getMinutes();
-    finishedTimeSlot.children[0].append(document.createTextNode(startString));
-    finishedTimeSlot.children[1].append(document.createTextNode(endString));
-    collectedData.timeslots.push({ a_start: startDate, a_end: endDate });
+    /*let startString: string = startDate.getDate() + "." + (startDate.getMonth()+1) + "." + startDate.getFullYear() + " "
+                + (startDate.getHours() < 10 ? "0" : "")+ startDate.getHours() + ":" + (startDate.getMinutes() < 10 ? "0" : "")
+                + startDate.getMinutes();
+    let endString: string = endDate.getDate() + "." + (endDate.getMonth()+1) + "." + endDate.getFullYear()
+                + " " + (endDate.getHours() < 10 ? "0" : "") + endDate.getHours() + ":" + (endDate.getMinutes() < 10 ? "0" : "")
+                + endDate.getMinutes();*/
+    finishedTimeSlot.children[0].append(document.createTextNode(startDate));
+    finishedTimeSlot.children[1].append(document.createTextNode(endDate));
+    collectedData.timeslots.push({ a_start_time: startDate, a_end_time: endDate });
+    alert(collectedData.timeslots[0].a_end_time);
     addButton.parentElement.remove();
     if (timeSlotID == 1) {
         var nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable");
@@ -220,7 +221,7 @@ function handleVoteInput() {
     }
 }
 function handleOptionInput() {
-    collectedData.a_end_date = endTimeInput.value;
+    collectedData.a_end_date = endTimeInput.value + " " + endTimeHourInput.value;
     console.log(collectedData.a_end_date);
     if (nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
         activeButton.addEventListener("click", listener);
@@ -250,9 +251,9 @@ function ajaxPullAppointment(link) {
                 var timeslot = newTimeSlotFinishedSlot.cloneNode(true);
                 timeslot.classList.remove("hide");
                 var start = timeslot.firstChild;
-                start.append(document.createTextNode(data.timeslots[i].a_start.toString()));
+                start.append(document.createTextNode(data.timeslots[i].a_start_time.toString()));
                 var end = timeslot.children[1];
-                end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
+                end.append(document.createTextNode(data.timeslots[i].a_end_time.toString()));
                 var checkbox = document.createElement("input");
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);

@@ -16,7 +16,7 @@ class Db_create_stuff extends Db_con
         $this->error_occured = false;
     }
 
-    
+
     /// -- Check Data Functions -- 
     function check_appointmentdata($array)
     {
@@ -64,11 +64,11 @@ class Db_create_stuff extends Db_con
     function check_timeslotdata($array)
     {
         //check if the data is set and not empty
-        if (!isset($array["a_start"]) || empty($array["a_start"])) {
+        if (!isset($array["a_start_time"]) || empty($array["a_start_time"])) {
             array_push($this->missing_data, "A start date for the timeslot.");
             $this->error_occured = true;
         }
-        if (!isset($array["a_end"]) || empty($array["a_end"])) {
+        if (!isset($array["a_end_time"]) || empty($array["a_end_time"])) {
             array_push($this->missing_data, "An end date for the timeslot.");
             $this->error_occured = true;
         }
@@ -83,15 +83,12 @@ class Db_create_stuff extends Db_con
 
     function check_votedata($array)
     {
-        if($this->check_timeslotdata($array))
-        {
-            if(!isset($array["a_baselink"]) || empty($array["a_baselink"]))
-            {
+        if ($this->check_timeslotdata($array)) {
+            if (!isset($array["a_baselink"]) || empty($array["a_baselink"])) {
                 array_push($this->missing_data, "Baselink to identify the event.");
                 $this->error_occured = true;
             }
-            if(!isset($array["a_name"]) || empty($array["a_name"]))
-            {
+            if (!isset($array["a_name"]) || empty($array["a_name"])) {
                 array_push($this->missing_data, "Your name to identify the vote.");
                 $this->error_occured = true;
             }
@@ -102,8 +99,7 @@ class Db_create_stuff extends Db_con
                 return false;
             }
             return true;
-        }
-        else
+        } else
             return false;
     }
 
@@ -114,7 +110,8 @@ class Db_create_stuff extends Db_con
     {
         if ($this->check_timeslotdata($timeslot)) {
             $timeslot["f_e_id"] = $foreign_key;
-            $query = "INSERT INTO t_timeslots (f_e_id,a_start,a_end) VALUES(?,?,?)";
+            $query = "INSERT INTO t_timeslots (f_e_id,a_start,a_end) 
+                VALUES(STR_TO_DATE(?,'%Y-%m-%d %h:%i'),STR_TO_DATE(?,'%Y-%m-%d %h:%i'),?)";
             $stmt = $this->pdo->prepare($query);
             $timeslot = $this->convert_to_timeslot($timeslot);
             $stmt->execute($timeslot);
@@ -157,7 +154,7 @@ class Db_create_stuff extends Db_con
             //Create appointment
             $appointment = $this->convert_to_appointment($array);
             $query = "INSERT INTO t_events (a_end_date,a_creator_name,a_creator_email,a_baselink,a_title, a_location, a_description) 
-                VALUES (STR_TO_DATE(?,'%Y-%m-%d'),?,?,?,?,?,?);";
+                VALUES (STR_TO_DATE(?,'%Y-%m-%d %h:%i'),?,?,?,?,?,?);";
             $stmt = $this->pdo->prepare($query);
             $x = $stmt->execute($appointment);
 
@@ -188,36 +185,32 @@ class Db_create_stuff extends Db_con
     }
     function create_vote($array)
     {
-        if($this->check_votedata($array))
-        {
+        if ($this->check_votedata($array)) {
             //Insert the vote 
             $vote = $this->convert_to_vote($array); //This thing does more than it seems. it retrieves the event id and Time id
             $insert_query = "INSERT INTO t_votes (pf_i_id, pf_time_id, a_name) VALUES(?,?,?);";
             $stmt = $this->pdo->prepare($insert_query);
             $x = $stmt = $this->pdo->prepare($insert_query);
-            if($x)
+            if ($x)
                 return true;
-            else{
+            else {
                 $this->error($stmt->errorInfo()[2]);
                 return false;
             }
-            
         }
     }
 
     //This could also be called if votes need to be unique
     //Deselect an option function 
-    function delete_vote($array){
-        if($this->check_votedata($array))
-        {
+    function delete_vote($array)
+    {
+        if ($this->check_votedata($array)) {
             $vote = $this->convert_to_vote($array);
             $query = "DELETE 
                       FROM t_votes 
                       WHERE pf_e_id = ? AND pf_time_id = ? AND a_name LIKE ?";
             $stmt = $this->pdo->prepare($query);
             $stmt->execute($vote);
-
-
         }
     }
 
@@ -232,12 +225,11 @@ class Db_create_stuff extends Db_con
         WHERE t_events.baselink LIKE ?";
         $stmt = $this->pdo->prepare($query);
         $x = $stmt->execute([$baselink]);
-        if($x) {
+        if ($x) {
             return $stmt->fetchAll();
-        }
-        else {
+        } else {
             $this->error($stmt->errorInfo()[2]);
             return NULL;
-        }      
+        }
     }
 }
