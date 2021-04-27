@@ -21,6 +21,7 @@ var creatorGiven = false;
 var voterNameInput;
 var voterGiven = false;
 var endTimeInput;
+var endTimeHourInput;
 var newTimeslot = document.createElement("div");
 var plusSign = document.createElement("div");
 newTimeslot.classList.add("timeslot", "fade-in");
@@ -219,7 +220,8 @@ function handleVoteInput() {
     }
 }
 function handleOptionInput() {
-    collectedData.a_end_date = new Date(endTimeInput.value);
+    collectedData.a_end_date = endTimeInput.value;
+    console.log(collectedData.a_end_date);
     if (nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
@@ -274,6 +276,8 @@ function ajaxPushAppointment(appointment) {
         dataType: "json",
         data: appointment,
         success: function (data) {
+            alert("Success");
+            console.log(data);
             history.replaceState({}, "", "?x=" + data.a_baselink);
             goTo(5);
         },
@@ -293,6 +297,8 @@ window.onload = function () {
     var endTimeDiv = document.querySelector("div.options-content-end-time");
     endTimeInput = newTimeSlotCalendarInput.cloneNode(true);
     endTimeDiv.append(endTimeInput);
+    endTimeHourInput = newTimeSelect.cloneNode(true);
+    endTimeDiv.append(endTimeHourInput);
     mainBox = document.querySelector("div.main-box");
     activeButton = document.querySelector("div.create-new-appointment-content button");
     document.querySelector("div.calendar-bottom-buttons .button-back").addEventListener("click", function () { goTo(1); });

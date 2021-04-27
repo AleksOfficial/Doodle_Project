@@ -1,6 +1,8 @@
 interface AppointmentDate {
-    a_start: Date;
-    a_end: Date;
+    a_start: string;
+    a_start_time: string;
+    a_end: string;
+    a_end_time: string;
 }
 
 interface AppointmentData {
@@ -9,7 +11,7 @@ interface AppointmentData {
     a_description: string;
     a_creator_name: string;
     a_creator_email: string;
-    a_end_date: Date;
+    a_end_date: string;
     timeslots: AppointmentDate[];
 }
 
@@ -36,6 +38,7 @@ var creatorGiven = false;
 var voterNameInput: HTMLInputElement;
 var voterGiven = false;
 var endTimeInput: HTMLInputElement;
+var endTimeHourInput: HTMLSelectElement;
 
 var newTimeslot = document.createElement("div") as HTMLDivElement;
 var plusSign = document.createElement("div") as HTMLDivElement;
@@ -241,7 +244,8 @@ function handleVoteInput() {
 }
 
 function handleOptionInput() {
-    collectedData.a_end_date = new Date(endTimeInput.value);
+    collectedData.a_end_date = endTimeInput.value
+    console.log(collectedData.a_end_date);
     if(nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
@@ -302,6 +306,8 @@ function ajaxPushAppointment(appointment: AppointmentData) {
         dataType: "json",
         data: appointment,
         success: function(data: HashData) {
+            alert("Success");
+            console.log(data);
             history.replaceState({}, "", "?x=" + data.a_baselink);
             goTo(5);
         },
@@ -322,6 +328,8 @@ window.onload = () => {
     let endTimeDiv = document.querySelector("div.options-content-end-time") as HTMLDivElement;
     endTimeInput = newTimeSlotCalendarInput.cloneNode(true) as HTMLInputElement;
     endTimeDiv.append(endTimeInput);
+    endTimeHourInput = newTimeSelect.cloneNode(true) as HTMLSelectElement;
+    endTimeDiv.append(endTimeHourInput);
     mainBox = document.querySelector("div.main-box") as HTMLDivElement;
     activeButton = document.querySelector("div.create-new-appointment-content button") as HTMLButtonElement;
     document.querySelector("div.calendar-bottom-buttons .button-back").addEventListener("click", () => {goTo(1)});

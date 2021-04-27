@@ -13,9 +13,7 @@ class Db_get_appointments extends Db_con
         //This can be either just one query or 2. We will split this up into 2 for clearance.
         $query = "SELECT *
             FROM t_events e
-            INNER JOIN (SELECT p_m_id, a_email as a_creator_email, a_name FROM t_mail) m
-            ON e.f_m_id = m.p_m_id
-            WHERE a_baselink = ? ";
+            WHERE e.a_baselink = ? ";
         $stmt = $this->pdo->prepare($query);
         $x = $stmt->execute([$baseLink]);
 

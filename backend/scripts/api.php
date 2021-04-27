@@ -54,15 +54,19 @@ function responsePushAppointment($data)
 
 if (isset($_GET['baselink'])) {
     responsePullAppointment(getData($_GET['baselink']));
-} else {
-    responsePullAppointment(null);
 }
+
 if (isset($_POST['a_title'])) {
+    /*var_dump($_POST);
+    exit;*/
     $connector = new Db_create_stuff();
     $hash = $connector->create_appointment($_POST);
-    if($hash != NULL)
+    if ($hash != NULL) {
         http_response_code(200);
-    else
+        $hashArray['a_baselink'] =  $hash;
+        echo json_encode($hashArray); // Eckige Klammern?
+    } else {
         http_response_code(500);
-    json_encode($hash); // Eckige Klammern?
+        echo $connector->errorMessage;
+    }
 }
