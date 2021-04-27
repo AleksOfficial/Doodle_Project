@@ -1,4 +1,10 @@
 <?php
+
+function debugLog(string $log)
+{
+    file_put_contents("debug.txt", $log);
+}
+
 class Db_create_stuff extends Db_con
 {
     //It would probably be nice to have some form of error class instead of handling the errors everywhere individually with each function
