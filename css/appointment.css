@@ -7,12 +7,22 @@
   margin: 20px;
 }
 
-.appointment-checkbox {
+.appointment-checkbox,
+.appointment-vote-count {
   text-align: center;
 }
 
-.appointment-content-main-submit {
+.appointment-content-main-submit,
+.appointment-content-main-delete {
   text-align: center;
+}
+
+.appointment-content-main-delete button {
+  background-color: rgb(255, 0, 0);
+}
+
+.appointment-content-main-delete button:hover {
+  background-color: rgb(179, 0, 0);
 }
 
 .appointment-content-main-submit button {

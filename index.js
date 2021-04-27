@@ -6,7 +6,7 @@ var collectedData = {
     a_creator_email: "",
     a_end_date: null,
     timeslots: [],
-    votes: { a_baselink: "", votes: [] }
+    votes: []
 };
 var divs = [];
 var mainBox;
@@ -24,6 +24,7 @@ var voterGiven = false;
 var endTimeInput;
 var endTimeHourInput;
 var votes;
+var votedHash;
 votes = {
     a_baselink: "",
     votes: []
@@ -224,6 +225,7 @@ function pushVotes() {
     }
     var params = new URLSearchParams(location.search);
     votes.a_baselink = params.get("x");
+    activeButton.removeEventListener("click", pushVotes);
     ajaxPushVotes(votes);
 }
 function handleVoteInput() {
@@ -278,10 +280,39 @@ function ajaxPullAppointment(link) {
                 var checkbox = document.createElement("input");
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);
-                var checkboxDiv = document.createElement("div");
-                checkboxDiv.classList.add("appointment-checkbox");
-                checkboxDiv.append(checkbox);
-                timeslot.append(checkboxDiv);
+                votedHash = "";
+                for (var i_1 = 0; i_1 < data.votes.length; i_1++) {
+                    if (document.cookie.indexOf(data.votes[i_1].a_hashbytes)) {
+                        votedHash = data.votes[i_1].a_hashbytes;
+                    }
+                }
+                if (votedHash == "") {
+                    var checkboxDiv = document.createElement("div");
+                    checkboxDiv.classList.add("appointment-checkbox");
+                    checkboxDiv.append(checkbox);
+                    timeslot.append(checkboxDiv);
+                }
+                else {
+                    document.querySelector("div.appointment-content-main-submit").classList.add("hide");
+                    document.querySelector("div.appointment-content-main-delete").classList.remove("hide");
+                    var button = document.querySelector("div.appointment-content-main-delete button");
+                    button.addEventListener("click", function () {
+                        console.log(votedHash);
+                        document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
+                        console.log(document.cookie);
+                    });
+                }
+                var count = 0;
+                for (var i_2 = 0; i_2 < data.votes.length; i_2++) {
+                    if (data.timeslots[i_2].a_start.toString() == data.votes[i_2].a_start
+                        && data.timeslots[i_2].a_end.toString() == data.votes[i_2].a_end) {
+                        count++;
+                    }
+                }
+                var countDiv = document.createElement("div");
+                countDiv.classList.add("appointment-vote-count");
+                countDiv.append(document.createTextNode("Votes: " + count.toString()));
+                timeslot.append(countDiv);
                 vote.append(timeslot);
             }
         },
@@ -315,8 +346,8 @@ function ajaxPushVotes(votes) {
         dataType: "json",
         data: votes,
         success: function (data) {
-            console.log(data);
             document.cookie = data.a_hashbytes + "=voted";
+            location.reload();
         },
         error: function (xhr, textStatus, errorThrown) {
             var loading = document.querySelector("div.loading-content");

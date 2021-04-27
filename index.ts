@@ -11,7 +11,7 @@ interface AppointmentData {
     a_creator_email: string;
     a_end_date: string;
     timeslots: AppointmentDate[];
-    votes: Votes;
+    votes: Vote[];
 }
 
 var collectedData: AppointmentData = {
@@ -22,7 +22,7 @@ var collectedData: AppointmentData = {
     a_creator_email: "",
     a_end_date: null,
     timeslots: [],
-    votes: {a_baselink: "", votes: []}
+    votes: []
 }
 
 var divs: HTMLDivElement[] = [];
@@ -41,6 +41,7 @@ var voterGiven = false;
 var endTimeInput: HTMLInputElement;
 var endTimeHourInput: HTMLSelectElement;
 var votes: Votes;
+var votedHash: string;
 
 votes = {
     a_baselink : "",
@@ -249,6 +250,7 @@ function pushVotes() {
     }
     let params = new URLSearchParams(location.search);
     votes.a_baselink = params.get("x");
+    activeButton.removeEventListener("click", pushVotes);
     ajaxPushVotes(votes);
 }
 
@@ -304,10 +306,38 @@ function ajaxPullAppointment(link: string) {
                 let checkbox = document.createElement("input") as HTMLInputElement;
                 checkbox.setAttribute("type", "checkbox");
                 checkbox.addEventListener("click", voteListener);
-                let checkboxDiv = document.createElement("div") as HTMLDivElement;
-                checkboxDiv.classList.add("appointment-checkbox");
-                checkboxDiv.append(checkbox);
-                timeslot.append(checkboxDiv);
+                votedHash = "";
+                for (let i = 0; i < data.votes.length; i++) {
+                    if (document.cookie.indexOf(data.votes[i].a_hashbytes)) {
+                        votedHash = data.votes[i].a_hashbytes;
+                    }
+                }
+                if (votedHash == ""){
+                    let checkboxDiv = document.createElement("div") as HTMLDivElement;
+                    checkboxDiv.classList.add("appointment-checkbox");
+                    checkboxDiv.append(checkbox);
+                    timeslot.append(checkboxDiv);
+                } else {
+                    document.querySelector("div.appointment-content-main-submit").classList.add("hide");
+                    document.querySelector("div.appointment-content-main-delete").classList.remove("hide");
+                    let button = document.querySelector("div.appointment-content-main-delete button") as HTMLButtonElement;
+                    button.addEventListener("click", () => {
+                        console.log(votedHash);
+                        document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
+                        console.log(document.cookie);
+                    })
+                }
+                let count: number = 0;
+                for (let i = 0; i < data.votes.length; i++) {
+                    if (data.timeslots[i].a_start.toString() == data.votes[i].a_start 
+                        && data.timeslots[i].a_end.toString() == data.votes[i].a_end) {
+                            count++;
+                    }
+                }
+                let countDiv = document.createElement("div") as HTMLDivElement;
+                countDiv.classList.add("appointment-vote-count");
+                countDiv.append(document.createTextNode("Votes: " + count.toString()))
+                timeslot.append(countDiv);
                 vote.append(timeslot);
             }
 
@@ -364,8 +394,8 @@ function ajaxPushVotes(votes: Votes) {
         dataType: "json",
         data: votes,
         success: function(data: HashDataVote) {
-            console.log(data);
             document.cookie = data.a_hashbytes + "=voted";
+            location.reload();
         },
         error: function(xhr, textStatus, errorThrown) {
             let loading = document.querySelector("div.loading-content") as HTMLDivElement;
