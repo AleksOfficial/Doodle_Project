@@ -1,3 +1,4 @@
+
 var collectedData = {
     a_title: "",
     a_location: "",
@@ -24,6 +25,11 @@ var voterGiven = false;
 var endTimeInput;
 var endTimeHourInput;
 var votes;
+var commentNameInput;
+var commentTextArea;
+var commentButton;
+var commentData;
+var commentGiven = false;
 votes = {
     a_baselink: "",
     votes: []
@@ -119,6 +125,7 @@ function goTo(page) {
     if (page == 5) {
         clearInterval(intervalFunction);
         intervalFunction = setInterval(handleVoteInput, 100);
+        setInterval(handleCommentInput, 100);
         mainBox.classList.remove("main-box-large");
         mainBox.classList.add("main-box-full");
         activeButton = document.querySelector("div.appointment-content-main-submit button");
@@ -192,6 +199,26 @@ function handleCreatorInput() {
         activeButton.removeEventListener("click", listener);
         activeButton.classList.add("button-unclickable");
         activeButton.classList.remove("button-clickable");
+        creatorGiven = false;
+    }
+}
+commentData = {
+    a_name: "",
+    a_comment: ""
+};
+function handleCommentInput() {
+    commentData.a_name = commentNameInput.value;
+    commentData.a_comment = commentTextArea.value;
+    if (commentNameInput.value != "" && commentTextArea.value != "" && !commentGiven) {
+        commentButton.addEventListener("click", ajaxPushComment);
+        commentButton.classList.add("button-clickable");
+        commentButton.classList.remove("button-unclickable");
+        creatorGiven = true;
+    }
+    else if ((commentNameInput.value == "" || commentTextArea.value == "") && commentGiven) {
+        commentButton.removeEventListener("click", ajaxPushComment);
+        commentButton.classList.add("button-unclickable");
+        commentButton.classList.remove("button-clickable");
         creatorGiven = false;
     }
 }
@@ -374,6 +401,22 @@ function ajaxPushVotes(votes) {
         }
     });
 }
+function ajaxPushComment() {
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: commentData,
+        success: function (data) {
+            console.log("win");
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            if (xhr.status == 500) {
+                console.log("lose");
+            }
+        }
+    });
+}
 window.onload = function () {
     divs[0] = document.querySelector("div.create-new-appointment-content");
     divs[1] = document.querySelector("div.options-content");
@@ -396,6 +439,9 @@ window.onload = function () {
     creatorNameInput = document.querySelector("div.creator-content input[name = 'creatorName']");
     creatorEmailInput = document.querySelector("div.creator-content input[name = 'creatorEmail']");
     voterNameInput = document.querySelector("div.appointment-content-main-submit input");
+    commentNameInput = document.querySelector("input.appointment-content-main-comments-name-input");
+    commentTextArea = document.querySelector("textarea.appointment-content-main-comments-textarea");
+    commentButton = document.querySelector("div.appointment-content-main-comments button");
     document.querySelector("div.appointment-content-main-link button").addEventListener("click", function () {
         var inputField = document.querySelector("div.appointment-content-main-link input");
         inputField.select();

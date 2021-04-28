@@ -233,6 +233,11 @@ interface CommentData {
     a_comment: string;
 }
 
+commentData = {
+    a_name: "",
+    a_comment: ""
+}
+
 function handleCommentInput() {
     commentData.a_name = commentNameInput.value;
     commentData.a_comment = commentTextArea.value;
@@ -491,14 +496,14 @@ window.onload = () => {
     creatorEmailInput = document.querySelector("div.creator-content input[name = 'creatorEmail']") as HTMLInputElement;
     voterNameInput = document.querySelector("div.appointment-content-main-submit input") as HTMLInputElement;
     commentNameInput = document.querySelector("input.appointment-content-main-comments-name-input") as HTMLInputElement;
-    commentTextArea = document.querySelector("input.appointment-content-main-comments-textarea") as HTMLTextAreaElement;
+    commentTextArea = document.querySelector("textarea.appointment-content-main-comments-textarea") as HTMLTextAreaElement;
     commentButton = document.querySelector("div.appointment-content-main-comments button") as HTMLButtonElement;
     document.querySelector("div.appointment-content-main-link button").addEventListener("click", function() {
         let inputField = document.querySelector("div.appointment-content-main-link input") as HTMLInputElement;
         inputField.select();
         inputField.setSelectionRange(0,99999);
         document.execCommand("copy");
-    })
+    });
     intervalFunction = setInterval(handleNameInput, 100);
     let inputs = document.getElementsByTagName("input") as HTMLCollectionOf<HTMLInputElement>;
     for (let i = 0; i < inputs.length; i++) {
