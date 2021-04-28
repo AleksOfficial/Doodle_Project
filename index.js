@@ -134,12 +134,6 @@ function addTimeSlot(e) {
         + " " + addButton.parentElement.children[1].children[1].value;
     var finishedTimeSlot = addButton.parentElement.parentElement.lastChild;
     finishedTimeSlot.classList.remove("hide");
-    /*let startString: string = startDate.getDate() + "." + (startDate.getMonth()+1) + "." + startDate.getFullYear() + " "
-                + (startDate.getHours() < 10 ? "0" : "")+ startDate.getHours() + ":" + (startDate.getMinutes() < 10 ? "0" : "")
-                + startDate.getMinutes();
-    let endString: string = endDate.getDate() + "." + (endDate.getMonth()+1) + "." + endDate.getFullYear()
-                + " " + (endDate.getHours() < 10 ? "0" : "") + endDate.getHours() + ":" + (endDate.getMinutes() < 10 ? "0" : "")
-                + endDate.getMinutes();*/
     finishedTimeSlot.children[0].append(document.createTextNode(startDate));
     finishedTimeSlot.children[1].append(document.createTextNode(endDate));
     collectedData.timeslots.push({ a_start: startDate, a_end: endDate });
@@ -266,13 +260,16 @@ function ajaxDeleteVotes(votedHash) {
         type: "post",
         url: "backend/scripts/api.php",
         dataType: "json",
-        data: { p_hashbytes: votedHash, a_baselink: baselink },
-        success: function () {
+        data: { p_hashbytes: votedHash },
+        success: function (data) {
             location.reload();
         },
         error: function (xhr, textStatus, errorThrown) {
-            var loading = document.querySelector("div.loading-content");
-            loading.innerHTML = xhr.responseText;
+            if (xhr.status == 500) {
+                alert("Test");
+                var loading = document.querySelector("div.loading-content");
+                loading.innerHTML = xhr.responseText;
+            }
         }
     });
 }
@@ -287,6 +284,8 @@ function ajaxPullAppointment(link) {
             headline.append(document.createTextNode(data.a_title));
             document.querySelector("div.appointment-content header").append(headline);
             var vote = document.querySelector("div.appointment-content-main-vote");
+            var linkInput = document.querySelector("div.appointment-content-main-link input");
+            linkInput.value = location.href;
             var _loop_1 = function (i) {
                 var timeslot = newTimeSlotFinishedSlot.cloneNode(true);
                 timeslot.classList.remove("hide");
@@ -316,16 +315,19 @@ function ajaxPullAppointment(link) {
                     button.addEventListener("click", function () { removeCookie(votedHash); });
                 }
                 var count = 0;
+                var countDiv = document.createElement("div");
+                countDiv.classList.add("appointment-vote-count");
+                timeslot.append(countDiv);
                 for (var j = 0; j < data.votes.length; j++) {
                     if (data.timeslots[i].a_start.toString() == data.votes[j].a_start
                         && data.timeslots[i].a_end.toString() == data.votes[j].a_end) {
                         count++;
+                        var newName = document.createElement("div");
+                        newName.append(document.createTextNode(data.votes[j].a_name));
+                        timeslot.append(newName);
                     }
                 }
-                var countDiv = document.createElement("div");
-                countDiv.classList.add("appointment-vote-count");
                 countDiv.append(document.createTextNode("Votes: " + count.toString()));
-                timeslot.append(countDiv);
                 vote.append(timeslot);
             };
             for (var i = 0; i < data.timeslots.length; i++) {
@@ -365,8 +367,10 @@ function ajaxPushVotes(votes) {
             location.reload();
         },
         error: function (xhr, textStatus, errorThrown) {
-            var loading = document.querySelector("div.loading-content");
-            loading.innerHTML = xhr.responseText;
+            if (xhr.status == 500) {
+                var loading = document.querySelector("div.loading-content");
+                loading.innerHTML = xhr.responseText;
+            }
         }
     });
 }
@@ -392,6 +396,12 @@ window.onload = function () {
     creatorNameInput = document.querySelector("div.creator-content input[name = 'creatorName']");
     creatorEmailInput = document.querySelector("div.creator-content input[name = 'creatorEmail']");
     voterNameInput = document.querySelector("div.appointment-content-main-submit input");
+    document.querySelector("div.appointment-content-main-link button").addEventListener("click", function () {
+        var inputField = document.querySelector("div.appointment-content-main-link input");
+        inputField.select();
+        inputField.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+    });
     intervalFunction = setInterval(handleNameInput, 100);
     var inputs = document.getElementsByTagName("input");
     for (var i = 0; i < inputs.length; i++) {

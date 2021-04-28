@@ -12,6 +12,10 @@
   text-align: center;
 }
 
+.appointment-vote-count {
+  padding-bottom: 20px;
+}
+
 .appointment-content-main-submit,
 .appointment-content-main-delete {
   text-align: center;
@@ -25,8 +29,37 @@
   background-color: rgb(179, 0, 0);
 }
 
+.appointment-content-main-link input {
+  width: 80%;
+}
+
+.appointment-content-main-link {
+  margin: 50px 0;
+}
+
 .appointment-content-main-submit button {
   width: 20%;
   min-width: 150px;
   margin: 20px;
+}
+
+.appointment-content-main-comments {
+  text-align: center;
+}
+
+.appointment-content-main-comments textarea {
+  width: 90%;
+  max-width: 900px;
+  height: 300px;
+  resize: none;
+  font-size: 2em;
+}
+
+.appointment-content-main-comments div {
+  margin: 20px;
+}
+
+.appointment-content-main-comment-insert {
+  width: 90%;
+  max-width: 900px;
 }
