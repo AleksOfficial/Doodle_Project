@@ -243,16 +243,15 @@ class Db_create_stuff extends Db_con
     function delete_vote($array)
     {
         //Delete with the hashbytes stored in the cookie
-        if(isset($array["p_hashbytes"]) && !empty($array["p_hashbytes"]))
-        {
+        if (isset($array["p_hashbytes"]) && !empty($array["p_hashbytes"])) {
             $query = "DELETE 
                       FROM t_votes 
                       WHERE p_hashbytes LIKE ?";
             $stmt = $this->pdo->prepare($query);
-            $x = $stmt->execute($array["p_hashbytes"]);
-            if($x)
+            $x = $stmt->execute([$array["p_hashbytes"]]);
+            if ($x)
                 return true;
-            else{
+            else {
                 $this->error($stmt->errorInfo()[2]);
                 return NULL;
             }

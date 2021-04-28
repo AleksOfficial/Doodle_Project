@@ -58,12 +58,15 @@ function responsePushAppointment($data)
 //Entry Point
 //Post
 
+
 if(isset($_GET['closing_polls']))
 {
+
     $db_con = new DB_get_invites();
 
     //Query DB - Look for Polls that are ending within 5 minutes and which ended exactly at that minute, retrieve title/e_id/baselink
     $polls = $db_con->get_closing_polls();
+
     $mailer = new Sending_mails();
 
     //Go through each closed poll, get all the associated invites and send the closed mail
@@ -79,7 +82,9 @@ if(isset($_GET['closing_polls']))
       foreach($invites as $invite)
         $mailer->send_almost_closed($poll,$invite["a_recipient_email"]);
     }
+
 }
+
 
 if (isset($_GET['baselink'])) {
 
@@ -121,6 +126,11 @@ if (isset($_POST['votes'])) {
 
 if (isset($_POST["p_hashbytes"])) {
     $connector = new Db_create_stuff();
-    $connector->delete_vote($_POST);
-    http_response_code(200);
+    if ($connector->delete_vote($_POST)) {
+        http_response_code(200);
+        echo json_encode([true]);
+    } else {
+        http_response_code(500);
+        echo json_encode([true]);
+    }
 }

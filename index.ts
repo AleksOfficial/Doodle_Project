@@ -1,3 +1,5 @@
+import { ajax } from "jquery";
+
 interface AppointmentDate {
     a_start: string;
     a_end: string;
@@ -41,6 +43,11 @@ var voterGiven = false;
 var endTimeInput: HTMLInputElement;
 var endTimeHourInput: HTMLSelectElement;
 var votes: Votes;
+var commentNameInput: HTMLInputElement;
+var commentTextArea: HTMLTextAreaElement;
+var commentButton: HTMLButtonElement;
+var commentData: CommentData;
+var commentGiven: boolean = false;
 
 votes = {
     a_baselink : "",
@@ -139,6 +146,7 @@ function goTo(page: number) {
     if (page == 5) {
         clearInterval(intervalFunction);
         intervalFunction = setInterval(handleVoteInput, 100);
+        setInterval(handleCommentInput, 100);
         mainBox.classList.remove("main-box-large");
         mainBox.classList.add("main-box-full");
         activeButton = document.querySelector("div.appointment-content-main-submit button");
@@ -155,12 +163,6 @@ function addTimeSlot(e: Event) {
                             + " " + (addButton.parentElement.children[1].children[1] as HTMLSelectElement).value;
     let finishedTimeSlot = addButton.parentElement.parentElement.lastChild as HTMLDivElement;
     finishedTimeSlot.classList.remove("hide");
-    /*let startString: string = startDate.getDate() + "." + (startDate.getMonth()+1) + "." + startDate.getFullYear() + " " 
-                + (startDate.getHours() < 10 ? "0" : "")+ startDate.getHours() + ":" + (startDate.getMinutes() < 10 ? "0" : "") 
-                + startDate.getMinutes();
-    let endString: string = endDate.getDate() + "." + (endDate.getMonth()+1) + "." + endDate.getFullYear()
-                + " " + (endDate.getHours() < 10 ? "0" : "") + endDate.getHours() + ":" + (endDate.getMinutes() < 10 ? "0" : "")
-                + endDate.getMinutes();*/
     finishedTimeSlot.children[0].append(document.createTextNode(startDate));
     finishedTimeSlot.children[1].append(document.createTextNode(endDate));
     collectedData.timeslots.push({a_start: startDate, a_end: endDate});
@@ -222,6 +224,32 @@ function handleCreatorInput() {
         activeButton.removeEventListener("click", listener);
         activeButton.classList.add("button-unclickable");
         activeButton.classList.remove("button-clickable");
+        creatorGiven = false;
+    }
+}
+
+interface CommentData {
+    a_name: string;
+    a_comment: string;
+}
+
+commentData = {
+    a_name: "",
+    a_comment: ""
+}
+
+function handleCommentInput() {
+    commentData.a_name = commentNameInput.value;
+    commentData.a_comment = commentTextArea.value;
+    if(commentNameInput.value != "" && commentTextArea.value != "" && !commentGiven) {
+        commentButton.addEventListener("click", ajaxPushComment);
+        commentButton.classList.add("button-clickable");
+        commentButton.classList.remove("button-unclickable");
+        creatorGiven = true;
+    } else if ((commentNameInput.value == "" || commentTextArea.value == "") && commentGiven) {
+        commentButton.removeEventListener("click", ajaxPushComment);
+        commentButton.classList.add("button-unclickable");
+        commentButton.classList.remove("button-clickable");
         creatorGiven = false;
     }
 }
@@ -293,13 +321,16 @@ function ajaxDeleteVotes(votedHash: string) {
         type: "post",
         url: "backend/scripts/api.php",
         dataType: "json",
-        data: {p_hashbytes: votedHash, a_baselink: baselink},
-        success: function() {
+        data: {p_hashbytes: votedHash},
+        success: function(data) {
             location.reload();
         },
         error: function(xhr, textStatus, errorThrown) {
-            let loading = document.querySelector("div.loading-content") as HTMLDivElement;
-            loading.innerHTML = xhr.responseText;
+            if (xhr.status == 500) {
+                alert("Test");
+                let loading = document.querySelector("div.loading-content") as HTMLDivElement;
+                loading.innerHTML = xhr.responseText;
+            }
         }
     });
 }
@@ -315,6 +346,8 @@ function ajaxPullAppointment(link: string) {
             headline.append(document.createTextNode(data.a_title));
             document.querySelector("div.appointment-content header").append(headline);
             let vote = document.querySelector("div.appointment-content-main-vote");
+            let linkInput = document.querySelector("div.appointment-content-main-link input") as HTMLInputElement;
+            linkInput.value = location.href;
             for (let i = 0; i < data.timeslots.length; i++) {
                 let timeslot = newTimeSlotFinishedSlot.cloneNode(true) as HTMLDivElement;
                 timeslot.classList.remove("hide");
@@ -343,16 +376,19 @@ function ajaxPullAppointment(link: string) {
                     button.addEventListener("click", () => {removeCookie(votedHash)});
                 }
                 let count: number = 0;
+                let countDiv = document.createElement("div") as HTMLDivElement;
+                countDiv.classList.add("appointment-vote-count");
+                timeslot.append(countDiv);
                 for (let j = 0; j < data.votes.length; j++) {
                     if (data.timeslots[i].a_start.toString() == data.votes[j].a_start 
                         && data.timeslots[i].a_end.toString() == data.votes[j].a_end) {
                             count++;
+                            let newName = document.createElement("div");
+                            newName.append(document.createTextNode(data.votes[j].a_name));
+                            timeslot.append(newName);
                     }
                 }
-                let countDiv = document.createElement("div") as HTMLDivElement;
-                countDiv.classList.add("appointment-vote-count");
                 countDiv.append(document.createTextNode("Votes: " + count.toString()))
-                timeslot.append(countDiv);
                 vote.append(timeslot);
             }
 
@@ -412,8 +448,27 @@ function ajaxPushVotes(votes: Votes) {
             location.reload();
         },
         error: function(xhr, textStatus, errorThrown) {
-            let loading = document.querySelector("div.loading-content") as HTMLDivElement;
-            loading.innerHTML = xhr.responseText;
+            if (xhr.status == 500) {
+                let loading = document.querySelector("div.loading-content") as HTMLDivElement;
+                loading.innerHTML = xhr.responseText;
+            }
+        }
+    });
+}
+
+function ajaxPushComment() {
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: commentData,
+        success: function(data) {
+            console.log("win");
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            if (xhr.status == 500) {
+                console.log("lose");
+            }
         }
     });
 }
@@ -439,7 +494,16 @@ window.onload = () => {
     descriptionInput = document.querySelector("div.options-content input[name = 'description']") as HTMLInputElement;
     creatorNameInput = document.querySelector("div.creator-content input[name = 'creatorName']") as HTMLInputElement;
     creatorEmailInput = document.querySelector("div.creator-content input[name = 'creatorEmail']") as HTMLInputElement;
-    voterNameInput = document.querySelector("div.appointment-content-main-submit input");
+    voterNameInput = document.querySelector("div.appointment-content-main-submit input") as HTMLInputElement;
+    commentNameInput = document.querySelector("input.appointment-content-main-comments-name-input") as HTMLInputElement;
+    commentTextArea = document.querySelector("textarea.appointment-content-main-comments-textarea") as HTMLTextAreaElement;
+    commentButton = document.querySelector("div.appointment-content-main-comments button") as HTMLButtonElement;
+    document.querySelector("div.appointment-content-main-link button").addEventListener("click", function() {
+        let inputField = document.querySelector("div.appointment-content-main-link input") as HTMLInputElement;
+        inputField.select();
+        inputField.setSelectionRange(0,99999);
+        document.execCommand("copy");
+    });
     intervalFunction = setInterval(handleNameInput, 100);
     let inputs = document.getElementsByTagName("input") as HTMLCollectionOf<HTMLInputElement>;
     for (let i = 0; i < inputs.length; i++) {
