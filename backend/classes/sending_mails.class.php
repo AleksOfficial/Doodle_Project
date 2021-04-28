@@ -32,6 +32,7 @@ class Sending_mails
 
   public function get_content($poll, $mail_type, &$subject)
   {
+    
     $url_token = "localhost/doodle_project/index.html?x=".$poll['a_baselink'];
     if($mail_type === "invite")
     {
@@ -72,21 +73,22 @@ class Sending_mails
   }
   public function send_closed($poll,$recipient_email)
   {
-    $mail = $this->generate_mail($poll["a_baselink"],"closed",NULL,$recipient_email);
+    $mail = $this->generate_mail($poll["a_baselink"],"closed",$recipient_email);
     if($mail != NULL)
       $mail->send();
   }
   public function send_almost_closed($poll,$recipient_email)
   {
-    $mail = $this->generate_mail($poll["a_baselink"],"almost_closed",NULL,$recipient_email);
+    $mail = $this->generate_mail($poll["a_baselink"],"almost_closed",$recipient_email);
     if($mail != NULL)
       $mail->send();
   }
-  public function send_creator($event)
+  public function send_creator($poll)
   {
-    $mail = $this->generate_mail($event["a_baselink"],"created",NULL,$event["a_creator_email"]);
+    $mail = $this->generate_mail($poll,"created",$poll["a_creator_email"]);
+    
     if($mail!=NULL)
-      $mail->send();
+      $x = $mail->send();
   }
 }
 
