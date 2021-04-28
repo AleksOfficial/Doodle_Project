@@ -4,10 +4,10 @@ class Sending_mails
 {
   
   //Create Method sends the message with a hashtoken & type of mail. Returns the mail
-  public function generate_mail($url_token, $mail_type,$creator_name = NULL,$recipient_mail)
+  public function generate_mail($poll, $mail_type,$recipient_mail)
   {
     $subject = "";
-    $content = $this->get_content($url_token, $mail_type,$creator_name,$subject);
+    $content = $this->get_content($poll, $mail_type,$subject);
     $mail = new PHPMailer();
     $mail->isSMTP();
     $mail->SMTPOptions = array(
@@ -30,14 +30,14 @@ class Sending_mails
     return $mail;
   }
 
-  public function get_content($url_token, $mail_type, $creator_name = NULL, &$subject)
+  public function get_content($poll, $mail_type, &$subject)
   {
-    $url_token = "localhost/doodle_project/index.html?".$url_token;
+    $url_token = "localhost/doodle_project/index.html?x=".$poll['a_baselink'];
     if($mail_type === "invite")
     {
       $content = file_get_contents("../emails/email_invite.1php");
-      $content = str_replace("{{name}}",$creator_name,$content);
-      $subject = "Doodle Clone: You received a new Appointment from $creator_name!";
+      $content = str_replace("{{name}}",$poll["a_creator_name"],$content);
+      $subject = "Doodle Clone: You received a new Appointment from ".$poll["a_creator_name"]."!";
     }
     if($mail_type === "created"){
       $content = file_get_contents("../emails/email_created.php");
@@ -54,6 +54,8 @@ class Sending_mails
       $subject = "Doodle Clone: Poll closed - View the result here!";
     }
     $content = str_replace("{{action_url}}", $url_token, $content);
+    $content = str_replace("{{title}}", $poll["a_title"], $content);
+    $content = str_replace("{{a_end_date}}", $poll["a_end_date"], $content);
     return $content;
   }
 
@@ -61,16 +63,30 @@ class Sending_mails
   //public
 
   
-  //sending invites method, takes in an array and a creator, which then in turn sends out the mails
-  public function send_invites($email_array,$creator)
+  //Takes in the Poll and the recipient mail, generates and sends a mail to the recipient.
+  public function send_invites($array)
   {
-    $creator_mail = $this->generate_mail($creator["url_token"],"created");
-    $all_mails = [];
-    foreach($email_array as $email)
-    {
-      $new_mail = $this->generate_mail($email['url_token'],"invite",$creator["name"]);
-      array_push($all_mails,$new_mail);
-    }
+      $mail = $this->generate_mail($array["a_baselink"],"invite",$array["a_creator_name"],$array["a_recipient_email"]);
+      if($mail != NULL)
+        $mail->send();
+  }
+  public function send_closed($poll,$recipient_email)
+  {
+    $mail = $this->generate_mail($poll["a_baselink"],"closed",NULL,$recipient_email);
+    if($mail != NULL)
+      $mail->send();
+  }
+  public function send_almost_closed($poll,$recipient_email)
+  {
+    $mail = $this->generate_mail($poll["a_baselink"],"almost_closed",NULL,$recipient_email);
+    if($mail != NULL)
+      $mail->send();
+  }
+  public function send_creator($event)
+  {
+    $mail = $this->generate_mail($event["a_baselink"],"created",NULL,$event["a_creator_email"]);
+    if($mail!=NULL)
+      $mail->send();
   }
 }
 

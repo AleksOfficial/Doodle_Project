@@ -7,7 +7,7 @@ class DB_get_invites extends Db_con
   public function get_closing_polls()
   {
     $con = $this->connect();
-    $query = "SELECT p_e_id, a_title, a_baselink FROM t_events WHERE a_end_date LIKE ? OR a_end_date LIKE ?";
+    $query = "SELECT * FROM t_events WHERE a_end_date LIKE ?";
     
     $timestamp1 = new DateTime(); //End Polls
     $timestamp2 = new DateTime(); //5 min remaining polls
@@ -15,19 +15,26 @@ class DB_get_invites extends Db_con
     echo $timestamp1->format('Y-M-d H:i:00');
     echo"<br>";
     echo $timestamp2->format('Y-M-d H:i:00');
+    $closed = NULL;
+    $almost_closed = NULL;
     $stmt = $con->prepare($query);
-    $x = $stmt->execute([$timestamp1->format('Y-m-d H:i:00'),$timestamp2->format('Y-m-d H:i:00')]);
-
+    $x = $stmt->execute([$timestamp1->format('Y-m-d H:i:00')]);
     if($x)
-    {
-      return $stmt->fetchAll();
-    }
+      $closed = $stmt->fetchAll();
     else
     {
       $this->error($stmt->errorInfo()[2]);
       return NULL;
     }
-
+    $x = $stmt->execute([$timestamp2->format('Y-m-d H:i:00')]);
+    if($x)
+      $almost_closed = $stmt->fetchAll();
+    else
+    {
+      $this->error($stmt->errorInfo()[2]);
+      return NULL;
+    }
+    return [$closed,$almost_closed];
   }
   
   public function get_invites($e_id)
@@ -52,10 +59,7 @@ class DB_get_invites extends Db_con
     }
   }
 
-  public function get_invite_maillist()
-  {
-    
-  }
+
 
 
   /*

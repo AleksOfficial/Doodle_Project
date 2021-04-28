@@ -5,7 +5,7 @@ import requests
 import time
 
 while(42):
-    http = requests.get('http://127.0.0.1/doodle_project/backend/scripts/check_polls.php')
+    http = requests.get('http://127.0.0.1/doodle_project/backend/scripts/api.php', params={'closing_polls':'true'})
     
     print(http.text)
-    time.sleep(5)
+    time.sleep(15)

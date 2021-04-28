@@ -174,15 +174,40 @@ class Db_create_stuff extends Db_con
             foreach ($array["timeslots"] as $timeslot) {
                 $this->create_timeslot($timeslot, $foreign_key);
             }
+            
+            //send creator mail
+            $mailer = new Sending_mails();
+            $query = "SELECT * FROM t_events WHERE p_e_id = ?";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute([$foreign_key]);
+            $mailer->send_creator($stmt->fetch());
 
             //Check if emails are available, if so, create invites on for everyone; all the invites create also accordingly emails, and sends them
             if (isset($array["emaillist"]))
-                if (!empty($array["emaillist"]) && (gettype($array["emaillist"]) == "array")) {
-                    foreach ($array["emaillist"] as $email) {
+            {
+                if (!empty($array["emaillist"]) && (gettype($array["emaillist"]) == "array"))
+                {
+                    foreach ($array["emaillist"] as $email)
+                    {
                         if (!$this->create_invites($email, $foreign_key))
                             return NULL;
                     }
+                    
+                    //Retrieve the inserted invites
+                    $query = "SELECT *
+                    FROM t_invites
+                    INNER JOIN t_events ON t_invites.f_e_id = t_events.p_e_id 
+                    WHERE f_e_id = ?";
+                    $stmt = $this->pdo->prepare($query);
+                    $x = $stmt->execute([$foreign_key]);
+                    
+                    
+                    //Send Invite mails
+                    if($x)
+                        foreach($stmt->fetchAll() as $invite)
+                            $mailer->send_invites($invite);
                 }
+            }
             return $array["a_baselink"];
         }
         return NULL;

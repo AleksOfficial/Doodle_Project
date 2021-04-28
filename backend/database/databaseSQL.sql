@@ -39,7 +39,7 @@ CREATE TABLE t_comments(
 CREATE TABLE t_invites (
   p_i_id INTEGER PRIMARY KEY AUTO_INCREMENT,
   f_e_id INTEGER NOT NULL,
-  a_recipient_email INTEGER NOT NULL
+  a_recipient_email VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE t_timeslots(

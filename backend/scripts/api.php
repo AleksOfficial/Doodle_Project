@@ -58,29 +58,27 @@ function responsePushAppointment($data)
 //Entry Point
 //Post
 
-if(isset($_GET['send_mails']))
+if(isset($_GET['closing_polls']))
 {
     $db_con = new DB_get_invites();
 
     //Query DB - Look for Polls that are ending within 5 minutes and which ended exactly at that minute, retrieve title/e_id/baselink
     $polls = $db_con->get_closing_polls();
-  
-    //Look for Invites, that have this id, look for the emails attached to this event
-    foreach($polls as $poll)
+    $mailer = new Sending_mails();
+
+    //Go through each closed poll, get all the associated invites and send the closed mail
+    foreach($polls[0] as $poll)
     {
-      $invites = $db_con->get_invite_maillist($poll['p_e_id']);
-      //Generate Emails
-      $emails = [];
+      $invites = $db_con->get_invites($poll['p_e_id']);
       foreach($invites as $invite)
-      {
-        
-      }
+        $mailer->send_closed($poll,$invite["a_recipient_email"]);
     }  
-    //$sender = new Sending_mails();
-    //$sender->generate_mail("hello_world","invite","bob");
-  
-    //Send them
-  
+    foreach($polls[1] as $poll)
+    {
+      $invites = $db_con->get_invites($poll['p_e_id']);
+      foreach($invites as $invite)
+        $mailer->send_almost_closed($poll,$invite["a_recipient_email"]);
+    }
 }
 
 if (isset($_GET['baselink'])) {
@@ -93,6 +91,7 @@ if (isset($_POST['a_title'])) {
     /*var_dump($_POST);
     exit;*/
     $connector = new Db_create_stuff();
+    $mailer = new Sending_mails();
     $hash = $connector->create_appointment($_POST);
     if ($hash != NULL) {
         http_response_code(200);
