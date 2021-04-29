@@ -79,6 +79,7 @@ header {
   }
 
   .main-box-full {
+    position: relative;
     width: 90%;
     margin: 30px 5%;
     top: 0;

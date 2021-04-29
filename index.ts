@@ -22,7 +22,7 @@ var collectedData: AppointmentData = {
     a_description: "",
     a_creator_name: "",
     a_creator_email: "",
-    a_end_date: null,
+    a_end_date: "",
     timeslots: [],
     votes: []
 }
@@ -116,21 +116,24 @@ function goTo(page: number) {
         nameInput.value = collectedData.a_title;
         listener = () => {goTo(2)};
         activeButton = document.querySelector("div.options-content-main button") as HTMLButtonElement;
+        if (nameAndEndTimeGiven) {
+            activeButton.addEventListener("click", listener);
+        }
         intervalFunction = setInterval(handleOptionInput, 100);
     }
     if (page == 2) {
+        activeButton.removeEventListener("click", listener);
         clearInterval(intervalFunction);
         mainBox.classList.remove("main-box-large");
         mainBox.classList.add("main-box-full");
         collectedData.a_location = locationInput.value;
         collectedData.a_description = descriptionInput.value;
-        document.querySelector(".calendar-header-tags .calendar-header-name").append(collectedData.a_title);
-        document.querySelector(".calendar-header-tags .calendar-header-location").append(collectedData.a_location);
-        document.querySelector(".calendar-header-tags .calendar-header-description").append(collectedData.a_description);
+        document.querySelector(".calendar-header-tags .calendar-header-name").innerHTML = "Name: " + collectedData.a_title;
+        document.querySelector(".calendar-header-tags .calendar-header-location").innerHTML = "Location: " + collectedData.a_location;
+        document.querySelector(".calendar-header-tags .calendar-header-description").innerHTML = "Description: " + collectedData.a_description;
     }
     if (page == 3) {
         clearInterval(intervalFunction);
-        listener = () => {goTo(4)};
         activeButton = document.querySelector("div.creator-bottom-buttons .button-forward") as HTMLButtonElement;
         intervalFunction = setInterval(handleCreatorInput, 100);
         mainBox.classList.remove("main-box-full");
@@ -161,19 +164,23 @@ function addTimeSlot(e: Event) {
                             + " " + (addButton.parentElement.children[0].children[1] as HTMLSelectElement).value;
     let endDate = (addButton.parentElement.children[1].firstChild as HTMLInputElement).value
                             + " " + (addButton.parentElement.children[1].children[1] as HTMLSelectElement).value;
-    let finishedTimeSlot = addButton.parentElement.parentElement.lastChild as HTMLDivElement;
-    finishedTimeSlot.classList.remove("hide");
-    finishedTimeSlot.children[0].append(document.createTextNode(startDate));
-    finishedTimeSlot.children[1].append(document.createTextNode(endDate));
-    collectedData.timeslots.push({a_start: startDate, a_end: endDate});
-    addButton.parentElement.remove();
-    if(timeSlotID == 1) {
-        let nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable") as HTMLButtonElement;
-        nextButton.classList.remove("button-unclickable");
-        nextButton.classList.add("button-clickable");
-        nextButton.addEventListener("click", () => {goTo(3)});
+    if (new Date(startDate) < new Date(endDate)){
+        let finishedTimeSlot = addButton.parentElement.parentElement.lastChild as HTMLDivElement;
+        finishedTimeSlot.classList.remove("hide");
+        finishedTimeSlot.children[0].append(document.createTextNode(startDate));
+        finishedTimeSlot.children[1].append(document.createTextNode(endDate));
+        collectedData.timeslots.push({a_start: startDate, a_end: endDate});
+        addButton.parentElement.remove();
+        if(timeSlotID == 1) {
+            let nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable") as HTMLButtonElement;
+            nextButton.classList.remove("button-unclickable");
+            nextButton.classList.add("button-clickable");
+            nextButton.addEventListener("click", () => {goTo(3)});
+        }
+        addPlusSign();
+    } else {
+        alert("Start date must be before end date!");
     }
-    addPlusSign();
 }
 var addTimeSlotListener = (e: Event) => {addTimeSlot(e)};
 
@@ -212,16 +219,25 @@ function handleNameInput() {
     }
 }
 
+var finishListener = () => {
+    let emailInput = document.querySelector("input[type = email]") as HTMLInputElement;
+    if (emailInput.checkValidity()) {
+        goTo(4);
+    } else {
+        alert("Enter valid email address!");
+    }
+};
+
 function handleCreatorInput() {
     collectedData.a_creator_email = creatorEmailInput.value;
     collectedData.a_creator_name = creatorNameInput.value;
     if(creatorNameInput.value != "" && creatorEmailInput.value != "" && !creatorGiven) {
-        activeButton.addEventListener("click", listener);
+        activeButton.addEventListener("click", finishListener);
         activeButton.classList.add("button-clickable");
         activeButton.classList.remove("button-unclickable");
         creatorGiven = true;
     } else if ((creatorNameInput.value == "" || creatorEmailInput.value == "") && creatorGiven) {
-        activeButton.removeEventListener("click", listener);
+        activeButton.removeEventListener("click", finishListener);
         activeButton.classList.add("button-unclickable");
         activeButton.classList.remove("button-clickable");
         creatorGiven = false;
@@ -245,12 +261,12 @@ function handleCommentInput() {
         commentButton.addEventListener("click", ajaxPushComment);
         commentButton.classList.add("button-clickable");
         commentButton.classList.remove("button-unclickable");
-        creatorGiven = true;
+        commentGiven = true;
     } else if ((commentNameInput.value == "" || commentTextArea.value == "") && commentGiven) {
         commentButton.removeEventListener("click", ajaxPushComment);
         commentButton.classList.add("button-unclickable");
         commentButton.classList.remove("button-clickable");
-        creatorGiven = false;
+        commentGiven = false;
     }
 }
 
@@ -347,7 +363,22 @@ function ajaxPullAppointment(link: string) {
             document.querySelector("div.appointment-content header").append(headline);
             let vote = document.querySelector("div.appointment-content-main-vote");
             let linkInput = document.querySelector("div.appointment-content-main-link input") as HTMLInputElement;
+            if (document.cookie.indexOf(link) >= 0) {
+                let deleteDiv = document.createElement("div") as HTMLDivElement;
+                let deleteButton = document.createElement("button") as HTMLButtonElement;
+                deleteButton.addEventListener("click", () => {
+                    ajaxDeleteAppointment(link);
+                });
+                deleteButton.classList.add("button-clickable");
+                deleteButton.innerHTML = "Delete Appointment";
+                deleteDiv.classList.add("div-delete-button");
+                deleteDiv.append(deleteButton);
+                document.querySelector("div.appointment-content-main-link").append(deleteDiv);
+            }
             linkInput.value = location.href;
+            if (new Date(data.a_end_date) >= new Date()) {
+                document.querySelector("div.appointment-content-main-submit").classList.add("hide");
+            }
             for (let i = 0; i < data.timeslots.length; i++) {
                 let timeslot = newTimeSlotFinishedSlot.cloneNode(true) as HTMLDivElement;
                 timeslot.classList.remove("hide");
@@ -355,25 +386,27 @@ function ajaxPullAppointment(link: string) {
                 start.append(document.createTextNode(data.timeslots[i].a_start.toString()));
                 let end = timeslot.children[1] as HTMLDivElement;
                 end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
-                let checkbox = document.createElement("input") as HTMLInputElement;
-                checkbox.setAttribute("type", "checkbox");
-                checkbox.addEventListener("click", voteListener);
-                let votedHash = "";
-                for (let j = 0; j < data.votes.length; j++) {
-                    if (document.cookie.indexOf(data.votes[j].p_hashbytes) >= 0) {
-                        votedHash = data.votes[j].p_hashbytes;
+                if (new Date(data.a_end_date) < new Date()) {
+                    let checkbox = document.createElement("input") as HTMLInputElement;
+                    checkbox.setAttribute("type", "checkbox");
+                    checkbox.addEventListener("click", voteListener);
+                    let votedHash = "";
+                    for (let j = 0; j < data.votes.length; j++) {
+                        if (document.cookie.indexOf(data.votes[j].p_hashbytes) >= 0) {
+                            votedHash = data.votes[j].p_hashbytes;
+                        }
                     }
-                }
-                if (votedHash == ""){
-                    let checkboxDiv = document.createElement("div") as HTMLDivElement;
-                    checkboxDiv.classList.add("appointment-checkbox");
-                    checkboxDiv.append(checkbox);
-                    timeslot.append(checkboxDiv);
-                } else {
-                    document.querySelector("div.appointment-content-main-submit").classList.add("hide");
-                    document.querySelector("div.appointment-content-main-delete").classList.remove("hide");
-                    let button = document.querySelector("div.appointment-content-main-delete button") as HTMLButtonElement;
-                    button.addEventListener("click", () => {removeCookie(votedHash)});
+                    if (votedHash == ""){
+                        let checkboxDiv = document.createElement("div") as HTMLDivElement;
+                        checkboxDiv.classList.add("appointment-checkbox");
+                        checkboxDiv.append(checkbox);
+                        timeslot.append(checkboxDiv);
+                    } else {
+                        document.querySelector("div.appointment-content-main-submit").classList.add("hide");
+                        document.querySelector("div.appointment-content-main-delete").classList.remove("hide");
+                        let button = document.querySelector("div.appointment-content-main-delete button") as HTMLButtonElement;
+                        button.addEventListener("click", () => {removeCookie(votedHash)});
+                    }   
                 }
                 let count: number = 0;
                 let countDiv = document.createElement("div") as HTMLDivElement;
@@ -391,13 +424,16 @@ function ajaxPullAppointment(link: string) {
                 countDiv.append(document.createTextNode("Votes: " + count.toString()))
                 vote.append(timeslot);
             }
-
         },
         error: function(xhr, textStatus, errorThrown) {
             let appointment = document.querySelector("div.appointment-content-main") as HTMLDivElement;
             appointment.innerHTML = xhr.responseText;
         }
     });
+}
+
+function ajaxDeleteAppointment(link: string) {
+    console.log(link);
 }
 
 interface HashData {
@@ -412,6 +448,7 @@ function ajaxPushAppointment(appointment: AppointmentData) {
         data: appointment,
         success: function(data: HashData) {
             history.replaceState({}, "", "?x=" + data.a_baselink);
+            document.cookie = data.a_baselink + "=admin";
             goTo(5);
         },
         error: function(xhr, textStatus, errorThrown) {

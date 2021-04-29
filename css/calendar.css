@@ -7,10 +7,14 @@
 }
 
 .calendar-header-tags {
+  text-align: left;
   padding-top: 20px;
   color: rgb(109, 109, 109);
-  display: flex;
   justify-content: space-around;
+}
+
+.calendar-header-tags div {
+  padding-bottom: 20px;
 }
 
 .calendar-content-main {

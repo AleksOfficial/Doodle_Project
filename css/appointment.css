@@ -21,12 +21,19 @@
   text-align: center;
 }
 
-.appointment-content-main-delete button {
+.appointment-content-main-delete button,
+.div-delete-button button {
   background-color: rgb(255, 0, 0);
 }
 
-.appointment-content-main-delete button:hover {
+.appointment-content-main-delete button:hover,
+.div-delete-button button:hover {
   background-color: rgb(179, 0, 0);
+}
+
+.div-delete-button {
+  margin-top: 20px;
+  text-align: center;
 }
 
 .appointment-content-main-link input {
