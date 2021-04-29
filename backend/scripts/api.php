@@ -62,11 +62,7 @@ if (isset($_POST['a_title'])) {
     if ($hash != NULL) {
         http_response_code(200);
         $hashArray['a_baselink'] =  $hash[0];
-<<<<<<< Updated upstream
         $hashArray['a_admin_hash'] = $hash[1];
-=======
-        $hashArray['a_admin_hash'] =  $hash[1];
->>>>>>> Stashed changes
         echo json_encode($hashArray); // Eckige Klammern?
     } else {
         http_response_code(500);
@@ -104,22 +100,16 @@ if (isset($_POST["p_hashbytes"])) {
 }
 
 //Delete Poll ONLY POSSIBLE AS ADMIN
-<<<<<<< Updated upstream
-if (isset($_POST["a_admin_hash"]))
-{
+if (isset($_POST["a_admin_hash"])) {
     $alter_table = new Db_alter_event();
     $x = $alter_table->delete_event($_POST);
-    if($x)
-    {
+    if ($x) {
         http_response_code(200);
         echo json_encode([true]);
-    } else{
+    } else {
         http_response_code(500);
         echo json_encode([false]);
     }
-=======
-if (isset($_POST["delete_baselink"])) {
->>>>>>> Stashed changes
 }
 
 //Create additional timeslot
