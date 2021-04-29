@@ -65,7 +65,8 @@ if (isset($_POST['a_title'])) {
     $hash = $connector->create_appointment($_POST);
     if ($hash != NULL) {
         http_response_code(200);
-        $hashArray['a_baselink'] =  $hash;
+        $hashArray['a_baselink'] =  $hash[0];
+        $hashArray['a_admin_hash'] = $hash[1];
         echo json_encode($hashArray); // Eckige Klammern?
     } else {
         http_response_code(500);
@@ -98,14 +99,23 @@ if (isset($_POST["p_hashbytes"])) {
         echo json_encode([true]);
     } else {
         http_response_code(500);
-        echo json_encode([true]);
+        echo json_encode([false]); // was on true;
     }
 }
 
 //Delete Poll ONLY POSSIBLE AS ADMIN
-if (isset($_POST["delete_baselink"]))
+if (isset($_POST["a_admin_hash"]))
 {
-
+    $alter_table = new Db_alter_event();
+    $x = $alter_table->delete_event($_POST);
+    if($x)
+    {
+        http_response_code(200);
+        echo json_encode([true]);
+    } else{
+        http_response_code(500);
+        echo json_encode([false]);
+    }
 }
 
 //Create additional timeslot

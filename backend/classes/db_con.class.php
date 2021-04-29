@@ -50,13 +50,14 @@ abstract class Db_con
   function convert_to_appointment($array)
   {
     $appointment = [];
-    $appointment[0] = $array["a_end_date"];
-    $appointment[1] = $array["a_creator_name"];
-    $appointment[2] = $array["a_creator_email"];
-    $appointment[3] = $array["a_baselink"];
-    $appointment[4] = $array["a_title"];
-    $appointment[5] = $array["a_location"];
-    $appointment[6] = $array["a_description"];
+    $appointment[] = $array["a_end_date"];
+    $appointment[] = $array["a_creator_name"];
+    $appointment[] = $array["a_creator_email"];
+    $appointment[] = $array["a_admin_hash"];
+    $appointment[] = $array["a_baselink"];
+    $appointment[] = $array["a_title"];
+    $appointment[] = $array["a_location"];
+    $appointment[] = $array["a_description"];
     return $appointment;
   }
   function convert_to_timeslot($array)

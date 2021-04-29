@@ -172,13 +172,13 @@ class Db_create_stuff extends Db_con
             //All data is set, create Hashbytes
             $array["a_baselink"] = $this->create_hashbytes("a_baselink", "t_events");
             $array["a_admin_hash"] = $this->create_hashbytes("a_admin_hash", "t_events");
-            
+            //var_dump($array);
             if ($array["a_baselink"] == NULL)
                 return NULL;
             //Create appointment
             $appointment = $this->convert_to_appointment($array);
-            $query = "INSERT INTO t_events (a_end_date,a_creator_name,a_creator_email,a_baselink,a_title, a_location, a_description) 
-                VALUES (STR_TO_DATE(?,'%Y-%m-%d %H:%i'),?,?,?,?,?,?);";
+            $query = "INSERT INTO t_events (a_end_date,a_creator_name,a_creator_email,a_admin_hash,a_baselink,a_title, a_location, a_description) 
+                VALUES (STR_TO_DATE(?,'%Y-%m-%d %H:%i'),?,?,?,?,?,?,?);";
             $stmt = $this->pdo->prepare($query);
             $x = $stmt->execute($appointment);
 
