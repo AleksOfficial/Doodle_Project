@@ -10,6 +10,7 @@ var collectedData = {
     votes: [],
     comments: []
 };
+// set all global variables
 var divs = [];
 var mainBox;
 var nameInput;
@@ -38,6 +39,7 @@ votes = {
     a_baselink: "",
     votes: []
 };
+// create template for 
 var newTimeslot = document.createElement("div");
 var plusSign = document.createElement("div");
 newTimeslot.classList.add("timeslot", "fade-in");
@@ -139,6 +141,7 @@ function goTo(page) {
         activeButton = document.querySelector("div.appointment-content-main-submit button");
         var params = new URLSearchParams(location.search);
         ajaxPullAppointment(params.get("x"));
+        document.querySelector("div.email-list textarea").value = "";
     }
 }
 function addTimeSlot(e) {
@@ -326,8 +329,8 @@ function ajaxSendMail() {
             alert("emails sent!");
         },
         error: function (xhr, textStatus, errorThrown) {
+            alert("Error sending Mail");
             if (xhr.status == 500) {
-                alert("Error sending Mail");
                 var loading = document.querySelector("div.loading-content");
                 loading.innerHTML = xhr.responseText;
             }

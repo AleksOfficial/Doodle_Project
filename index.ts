@@ -29,6 +29,7 @@ var collectedData: AppointmentData = {
     comments: []
 }
 
+// set all global variables
 var divs: HTMLDivElement[] = [];
 var mainBox: HTMLDivElement;
 var nameInput: HTMLInputElement;
@@ -59,6 +60,7 @@ votes = {
     votes: []
 }
 
+// create template for 
 var newTimeslot = document.createElement("div") as HTMLDivElement;
 var plusSign = document.createElement("div") as HTMLDivElement;
 newTimeslot.classList.add("timeslot", "fade-in");
@@ -361,8 +363,8 @@ function ajaxSendMail() {
             alert("emails sent!");
         },
         error: function(xhr, textStatus, errorThrown) {
+            alert("Error sending Mail");
             if (xhr.status == 500) {
-                alert("Error sending Mail");
                 let loading = document.querySelector("div.loading-content") as HTMLDivElement;
                 loading.innerHTML = xhr.responseText;
             }
