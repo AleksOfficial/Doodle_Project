@@ -35,11 +35,12 @@ var commentGiven = false;
 var emailList;
 var emailButton;
 var emailListGiven = false;
+var intervalFunction;
 votes = {
     a_baselink: "",
     votes: []
 };
-// create template for 
+// create template for generation of new timeslots
 var newTimeslot = document.createElement("div");
 var plusSign = document.createElement("div");
 newTimeslot.classList.add("timeslot", "fade-in");
@@ -59,7 +60,7 @@ newTimeSlotCalendarInput.setAttribute("value", currentDate);
 var newTimeSlotInputContainer = document.createElement("div");
 newTimeSlotInputContainer.append(newTimeSlotCalendarInput);
 var newTimeSelect = document.createElement("select");
-for (var i = 0; i < 24 * 4; i++) {
+for (var i = 0; i < 24 * 4; i++) { // add options for each 15-minute-interval timestamp for the whole day
     var newOption = document.createElement("option");
     var hour = Math.floor(i / 4);
     var time = (hour < 10 ? "0" + hour : hour.toString()) + ":" + ((i % 4) * 15).toString() + (i % 4 == 0 ? 0 : "");
@@ -82,10 +83,10 @@ newTimeSlotFinishedSlot.append(document.createElement("div"));
 newTimeSlotFinishedSlot.classList.add("timeslot-finished", "hide", "fade-in");
 newTimeslot.append(newTimeSlotFinishedSlot);
 var timeSlotID = 0;
-var intervalFunction;
+//reusable function for site navigation
 var listener = function () { goTo(1); };
 function goTo(page) {
-    for (var i = 0; i < divs.length; i++) {
+    for (var i = 0; i < divs.length; i++) { // only show current div
         if (i == page) {
             divs[i].classList.remove("hide");
         }
@@ -93,7 +94,7 @@ function goTo(page) {
             divs[i].classList.add("hide");
         }
     }
-    if (page == 1) {
+    if (page == 1) { // options page
         clearInterval(intervalFunction);
         mainBox.classList.remove("main-box-full");
         mainBox.classList.add("main-box-large");
@@ -106,7 +107,7 @@ function goTo(page) {
         }
         intervalFunction = setInterval(handleOptionInput, 100);
     }
-    if (page == 2) {
+    if (page == 2) { // timeslot page
         activeButton.removeEventListener("click", listener);
         clearInterval(intervalFunction);
         mainBox.classList.remove("main-box-large");
@@ -117,21 +118,21 @@ function goTo(page) {
         document.querySelector(".calendar-header-tags .calendar-header-location").innerHTML = "Location: " + collectedData.a_location;
         document.querySelector(".calendar-header-tags .calendar-header-description").innerHTML = "Description: " + collectedData.a_description;
     }
-    if (page == 3) {
+    if (page == 3) { // admin name and email page
         clearInterval(intervalFunction);
         activeButton = document.querySelector("div.creator-bottom-buttons .button-forward");
         intervalFunction = setInterval(handleCreatorInput, 100);
         mainBox.classList.remove("main-box-full");
         mainBox.classList.add("main-box-large");
     }
-    if (page == 4) {
+    if (page == 4) { // this page is viewed while appointment is saved
         clearInterval(intervalFunction);
         mainBox.classList.remove("main-box-large");
         mainBox.classList.remove("main-box-full");
         clearInterval(intervalFunction);
         ajaxPushAppointment(collectedData);
     }
-    if (page == 5) {
+    if (page == 5) { // this is the appointment view
         clearInterval(intervalFunction);
         intervalFunction = setInterval(handleVoteInput, 100);
         setInterval(handleCommentInput, 100);
@@ -144,20 +145,21 @@ function goTo(page) {
         document.querySelector("div.email-list textarea").value = "";
     }
 }
+// add the specified timeslot to the list and then create a new plus sign/timeslot from the template
 function addTimeSlot(e) {
     var addButton = e.target;
     var startDate = addButton.parentElement.children[0].firstChild.value
         + " " + addButton.parentElement.children[0].children[1].value;
     var endDate = addButton.parentElement.children[1].firstChild.value
         + " " + addButton.parentElement.children[1].children[1].value;
-    if (new Date(startDate) < new Date(endDate)) {
+    if (new Date(startDate) < new Date(endDate)) { // timeslot start date must be before end date
         var finishedTimeSlot = addButton.parentElement.parentElement.lastChild;
         finishedTimeSlot.classList.remove("hide");
         finishedTimeSlot.children[0].append(document.createTextNode(startDate));
         finishedTimeSlot.children[1].append(document.createTextNode(endDate));
         collectedData.timeslots.push({ a_start: startDate, a_end: endDate });
         addButton.parentElement.remove();
-        if (timeSlotID == 1) {
+        if (timeSlotID == 1) { // if this was the first timeslot entered, make forward button clickable
             var nextButton = document.querySelector(".calendar-bottom-buttons .button-unclickable");
             nextButton.classList.remove("button-unclickable");
             nextButton.classList.add("button-clickable");
@@ -180,6 +182,7 @@ function handlePlusSignClick(e) {
     card.lastChild.addEventListener("click", addTimeSlotListener);
 }
 var handlePlusSignClickListener = function (e) { handlePlusSignClick(e); };
+// create new plus sign/timeslot from the template
 function addPlusSign() {
     var newSlot = newTimeslot.cloneNode(true);
     newSlot.id = timeSlotID.toString();
@@ -187,6 +190,7 @@ function addPlusSign() {
     document.querySelector("div.calendar-content-main").append(newSlot);
     newSlot.addEventListener("click", handlePlusSignClickListener);
 }
+// button only clickable if name was entered (page 0)
 function handleNameInput() {
     collectedData.a_title = nameInput.value;
     if (nameInput.value != "" && !nameGiven) {
@@ -202,6 +206,7 @@ function handleNameInput() {
         nameGiven = false;
     }
 }
+// only finish appointment if email is valid address
 var finishListener = function () {
     var emailInput = document.querySelector("input[type = email]");
     if (emailInput.checkValidity()) {
@@ -211,6 +216,7 @@ var finishListener = function () {
         alert("Enter valid email address!");
     }
 };
+// button only clickable if both name and email were entered (page 3)
 function handleCreatorInput() {
     collectedData.a_creator_email = creatorEmailInput.value;
     collectedData.a_creator_name = creatorNameInput.value;
@@ -232,6 +238,7 @@ commentData = {
     a_text: "",
     a_baselink: ""
 };
+// button only clickable if both name and comment were entered (page 5)
 function handleCommentInput() {
     commentData.a_name = commentNameInput.value;
     commentData.a_text = commentTextArea.value;
@@ -248,6 +255,7 @@ function handleCommentInput() {
         commentGiven = false;
     }
 }
+// count number of checked checkboxes for voting
 var numberOfVotes = 0;
 function voteListener(e) {
     var target = e.target;
@@ -258,6 +266,7 @@ function voteListener(e) {
         numberOfVotes--;
     }
 }
+// push votes to database
 function pushVotes() {
     var timeslots = document.querySelector("div.appointment-content-main-vote");
     for (var i = 0; i < timeslots.children.length; i++) {
@@ -273,6 +282,7 @@ function pushVotes() {
     activeButton.removeEventListener("click", pushVotes);
     ajaxPushVotes(votes);
 }
+// button only clickable if name was entered and at least one voting checkbox is checked
 function handleVoteInput() {
     if (voterNameInput.value != "" && numberOfVotes > 0 && !voterGiven) {
         activeButton.addEventListener("click", pushVotes);
@@ -287,6 +297,7 @@ function handleVoteInput() {
         voterGiven = false;
     }
 }
+// button only clickable if both name and end date are entered, location and description optional (page 1)
 function handleOptionInput() {
     collectedData.a_end_date = endTimeInput.value + " " + endTimeHourInput.value;
     if (nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
@@ -302,6 +313,7 @@ function handleOptionInput() {
         nameAndEndTimeGiven = false;
     }
 }
+// button only clickable if at least one address was entered (page 5, email invite)
 function handleEmailInput() {
     if (emailList.value != "" && !emailListGiven) {
         emailButton.addEventListener("click", ajaxSendMail);
@@ -316,6 +328,7 @@ function handleEmailInput() {
         emailListGiven = false;
     }
 }
+// send mail invites
 function ajaxSendMail() {
     var lines = emailList.value.split("\n");
     var baselink = (new URLSearchParams(location.href)).get("x");
@@ -337,10 +350,12 @@ function ajaxSendMail() {
         }
     });
 }
+// remove voting cookie to allow new votes, then delete votes
 function removeCookie(votedHash) {
     document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
     ajaxDeleteVotes(votedHash);
 }
+// delete the votes 
 function ajaxDeleteVotes(votedHash) {
     var params = new URLSearchParams(location.search);
     var baselink = params.get("x");
@@ -360,6 +375,7 @@ function ajaxDeleteVotes(votedHash) {
         }
     });
 }
+// pull appointment from db by hashlink and build page 5
 function ajaxPullAppointment(link) {
     $.ajax({
         type: "get",
@@ -374,7 +390,7 @@ function ajaxPullAppointment(link) {
             document.querySelector(".appointment-header-tags .appointment-header-description").innerHTML = "Description: " + data.a_description;
             var vote = document.querySelector("div.appointment-content-main-vote");
             var linkInput = document.querySelector("div.appointment-content-main-link input");
-            if (document.cookie.indexOf(link) >= 0) {
+            if (document.cookie.indexOf(link) >= 0) { // if admin cookie was set, display delete appointment button
                 var deleteDiv = document.createElement("div");
                 var deleteButton = document.createElement("button");
                 deleteButton.addEventListener("click", function () {
@@ -387,7 +403,7 @@ function ajaxPullAppointment(link) {
                 document.querySelector("div.appointment-content-main-link").append(deleteDiv);
             }
             linkInput.value = location.href;
-            if (new Date(data.a_end_date) < new Date()) {
+            if (new Date(data.a_end_date) < new Date()) { // hide voting button if time for voting has ended
                 document.querySelector("div.appointment-content-main-submit").classList.add("hide");
             }
             var _loop_1 = function (i) {
@@ -397,29 +413,30 @@ function ajaxPullAppointment(link) {
                 start.append(document.createTextNode(data.timeslots[i].a_start.toString()));
                 var end = timeslot.children[1];
                 end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
-                if (new Date(data.a_end_date) >= new Date()) {
+                if (new Date(data.a_end_date) >= new Date()) { // only create checkboxes if voting is still possible
                     var checkbox = document.createElement("input");
                     checkbox.setAttribute("type", "checkbox");
                     checkbox.addEventListener("click", voteListener);
                     var votedHash_1 = "";
-                    for (var j = 0; j < data.votes.length; j++) {
+                    for (var j = 0; j < data.votes.length; j++) { // check cookies if one of the votes was submitted by this user
                         if (document.cookie.indexOf(data.votes[j].p_hashbytes) >= 0) {
-                            votedHash_1 = data.votes[j].p_hashbytes;
+                            votedHash_1 = data.votes[j].p_hashbytes; // if yes, remember the hash
                         }
                     }
-                    if (votedHash_1 == "") {
+                    if (votedHash_1 == "") { // user did not already vote, so checbox is displayed
                         var checkboxDiv = document.createElement("div");
                         checkboxDiv.classList.add("appointment-checkbox");
                         checkboxDiv.append(checkbox);
                         timeslot.append(checkboxDiv);
                     }
-                    else {
+                    else { // user already voted, so delete votes button is displayed instead
                         document.querySelector("div.appointment-content-main-submit").classList.add("hide");
                         document.querySelector("div.appointment-content-main-delete").classList.remove("hide");
                         var button = document.querySelector("div.appointment-content-main-delete button");
                         button.addEventListener("click", function () { removeCookie(votedHash_1); });
                     }
                 }
+                // count all votes and display them on the card
                 var count = 0;
                 var countDiv = document.createElement("div");
                 countDiv.classList.add("appointment-vote-count");
@@ -439,6 +456,7 @@ function ajaxPullAppointment(link) {
             for (var i = 0; i < data.timeslots.length; i++) {
                 _loop_1(i);
             }
+            // display comments
             var commentSection = document.querySelector("div.appointment-content-main-comment-insert");
             for (var _i = 0, _a = data.comments; _i < _a.length; _i++) {
                 var comment = _a[_i];
@@ -459,10 +477,12 @@ function ajaxPullAppointment(link) {
         }
     });
 }
+// read the value from cookie with name a
 function getCookieValue(a) {
     var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
     return b ? b.pop() : '';
 }
+// delete appointment, link = hash baselink (?x=amdkasmd....)
 function ajaxDeleteAppointment(link) {
     var deleteData = {
         a_admin_hash: "",
@@ -479,13 +499,13 @@ function ajaxDeleteAppointment(link) {
         },
         error: function (xhr, textStatus, errorThrown) {
             if (xhr.status == 500) {
-                alert("Test");
                 var loading = document.querySelector("div.loading-content");
                 loading.innerHTML = xhr.responseText;
             }
         }
     });
 }
+// push appointment into db
 function ajaxPushAppointment(appointment) {
     $.ajax({
         type: "post",
@@ -493,8 +513,8 @@ function ajaxPushAppointment(appointment) {
         dataType: "json",
         data: appointment,
         success: function (data) {
-            history.replaceState({}, "", "?x=" + data.a_baselink);
-            document.cookie = data.a_baselink + "=" + data.a_admin_hash;
+            history.replaceState({}, "", "?x=" + data.a_baselink); // if successful, add new hash to address bar
+            document.cookie = data.a_baselink + "=" + data.a_admin_hash; // set admin cookie to allow for later admin functionality
             goTo(5);
         },
         error: function (xhr, textStatus, errorThrown) {
@@ -503,6 +523,7 @@ function ajaxPushAppointment(appointment) {
         }
     });
 }
+// push votes to db
 function ajaxPushVotes(votes) {
     $.ajax({
         type: "post",
@@ -510,7 +531,7 @@ function ajaxPushVotes(votes) {
         dataType: "json",
         data: votes,
         success: function (data) {
-            document.cookie = data.p_hashbytes + "=voted";
+            document.cookie = data.p_hashbytes + "=voted"; // set cookie with new hashbytes (hashbytes are cookie name, not value, to allow voting on several polls)
             location.reload();
         },
         error: function (xhr, textStatus, errorThrown) {
@@ -521,6 +542,7 @@ function ajaxPushVotes(votes) {
         }
     });
 }
+// push new comment to db
 function ajaxPushComment() {
     var params = new URLSearchParams(location.search);
     commentData.a_baselink = params.get("x");
@@ -539,20 +561,25 @@ function ajaxPushComment() {
         }
     });
 }
+// initialize all important global variables and set several eventListeners and setIntervals
 window.onload = function () {
+    // the different pages
     divs[0] = document.querySelector("div.create-new-appointment-content");
     divs[1] = document.querySelector("div.options-content");
     divs[2] = document.querySelector("div.calendar-content");
     divs[3] = document.querySelector("div.creator-content");
     divs[4] = document.querySelector("div.loading-content");
     divs[5] = document.querySelector("div.appointment-content");
+    // end time selection is built from template
     var endTimeDiv = document.querySelector("div.options-content-end-time");
     endTimeInput = newTimeSlotCalendarInput.cloneNode(true);
     endTimeDiv.append(endTimeInput);
     endTimeHourInput = newTimeSelect.cloneNode(true);
     endTimeDiv.append(endTimeHourInput);
     mainBox = document.querySelector("div.main-box");
+    // set active button to create button (page 1)
     activeButton = document.querySelector("div.create-new-appointment-content button");
+    // add listeners for static buttons
     document.querySelector("div.calendar-bottom-buttons .button-back").addEventListener("click", function () { goTo(1); });
     document.querySelector("div.creator-bottom-buttons .button-back").addEventListener("click", function () { goTo(2); });
     document.querySelector("button.email-button").addEventListener("click", function () {
@@ -561,6 +588,7 @@ window.onload = function () {
     document.querySelector("button.cancel-button").addEventListener("click", function () {
         document.querySelector("div.email-list").classList.add("hide");
     });
+    // initialize global variables
     nameInput = document.querySelector("div.create-new-appointment-content input");
     locationInput = document.querySelector("div.options-content input[name = 'location']");
     descriptionInput = document.querySelector("div.options-content input[name = 'description']");
@@ -572,19 +600,23 @@ window.onload = function () {
     commentButton = document.querySelector("div.appointment-content-main-comments button");
     emailList = document.querySelector("div.email-list textarea");
     emailButton = document.querySelector("button.email-invite-button");
+    // set up copy button for invite link
     document.querySelector("div.appointment-content-main-link button").addEventListener("click", function () {
         var inputField = document.querySelector("div.appointment-content-main-link input");
         inputField.select();
         inputField.setSelectionRange(0, 99999);
         document.execCommand("copy");
     });
+    // initial intervalFuntion for handling input in name field (page 0)
     intervalFunction = setInterval(handleNameInput, 100);
     var inputs = document.getElementsByTagName("input");
     for (var i = 0; i < inputs.length; i++) {
         inputs[i].value = "";
     }
+    // add first plus sign button for timeslot creation
     addPlusSign();
     var params = new URLSearchParams(location.search);
+    // if hashlink is present in URL, move to specified appointment instead
     if (params.get("x") != null) {
         goTo(5);
     }
