@@ -14,6 +14,7 @@ interface AppointmentData {
     a_end_date: string;
     timeslots: AppointmentDate[];
     votes: Vote[];
+    comments: CommentData[];
 }
 
 var collectedData: AppointmentData = {
@@ -24,7 +25,8 @@ var collectedData: AppointmentData = {
     a_creator_email: "",
     a_end_date: "",
     timeslots: [],
-    votes: []
+    votes: [],
+    comments: []
 }
 
 var divs: HTMLDivElement[] = [];
@@ -246,19 +248,19 @@ function handleCreatorInput() {
 
 interface CommentData {
     a_name: string;
-    a_comment: string;
+    a_text: string;
     a_baselink: string;
 }
 
 commentData = {
     a_name: "",
-    a_comment: "",
+    a_text: "",
     a_baselink: ""
 }
 
 function handleCommentInput() {
     commentData.a_name = commentNameInput.value;
-    commentData.a_comment = commentTextArea.value;
+    commentData.a_text = commentTextArea.value;
     if(commentNameInput.value != "" && commentTextArea.value != "" && !commentGiven) {
         commentButton.addEventListener("click", ajaxPushComment);
         commentButton.classList.add("button-clickable");

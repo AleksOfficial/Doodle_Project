@@ -7,7 +7,8 @@ var collectedData = {
     a_creator_email: "",
     a_end_date: "",
     timeslots: [],
-    votes: []
+    votes: [],
+    comments: []
 };
 var divs = [];
 var mainBox;
@@ -221,12 +222,12 @@ function handleCreatorInput() {
 }
 commentData = {
     a_name: "",
-    a_comment: "",
+    a_text: "",
     a_baselink: ""
 };
 function handleCommentInput() {
     commentData.a_name = commentNameInput.value;
-    commentData.a_comment = commentTextArea.value;
+    commentData.a_text = commentTextArea.value;
     if (commentNameInput.value != "" && commentTextArea.value != "" && !commentGiven) {
         commentButton.addEventListener("click", ajaxPushComment);
         commentButton.classList.add("button-clickable");
