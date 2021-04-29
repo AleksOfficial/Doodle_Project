@@ -70,3 +70,14 @@
   width: 90%;
   max-width: 900px;
 }
+
+.appointment-header-tags {
+  text-align: left;
+  padding-top: 20px;
+  color: rgb(109, 109, 109);
+  justify-content: space-around;
+}
+
+.appointment-header-tags div {
+  padding-bottom: 20px;
+}

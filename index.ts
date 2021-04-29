@@ -360,7 +360,10 @@ function ajaxPullAppointment(link: string) {
         success: function(data: AppointmentData) {
             let headline = document.createElement("h1");
             headline.append(document.createTextNode(data.a_title));
-            document.querySelector("div.appointment-content header").append(headline);
+            document.querySelector("div.appointment-content header").prepend(headline);
+            document.querySelector(".appointment-header-tags .appointment-header-name").innerHTML = "Name: " + data.a_title;
+            document.querySelector(".appointment-header-tags .appointment-header-location").innerHTML = "Location: " + data.a_location;
+            document.querySelector(".appointment-header-tags .appointment-header-description").innerHTML = "Description: " + data.a_description;
             let vote = document.querySelector("div.appointment-content-main-vote");
             let linkInput = document.querySelector("div.appointment-content-main-link input") as HTMLInputElement;
             if (document.cookie.indexOf(link) >= 0) {

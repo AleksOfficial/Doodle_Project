@@ -326,7 +326,10 @@ function ajaxPullAppointment(link) {
         success: function (data) {
             var headline = document.createElement("h1");
             headline.append(document.createTextNode(data.a_title));
-            document.querySelector("div.appointment-content header").append(headline);
+            document.querySelector("div.appointment-content header").prepend(headline);
+            document.querySelector(".appointment-header-tags .appointment-header-name").innerHTML = "Name: " + data.a_title;
+            document.querySelector(".appointment-header-tags .appointment-header-location").innerHTML = "Location: " + data.a_location;
+            document.querySelector(".appointment-header-tags .appointment-header-description").innerHTML = "Description: " + data.a_description;
             var vote = document.querySelector("div.appointment-content-main-vote");
             var linkInput = document.querySelector("div.appointment-content-main-link input");
             if (document.cookie.indexOf(link) >= 0) {
