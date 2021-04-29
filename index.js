@@ -403,8 +403,15 @@ function ajaxPullAppointment(link) {
         }
     });
 }
+function getCookieValue(a) {
+    var b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+    return b ? b.pop() : '';
+}
 function ajaxDeleteAppointment(link) {
-    console.log(link);
+    var deleteData;
+    deleteData.a_baselink = link;
+    deleteData.a_admin_hash = getCookieValue(link);
+    console.log(deleteData);
 }
 function ajaxPushAppointment(appointment) {
     $.ajax({
@@ -414,7 +421,7 @@ function ajaxPushAppointment(appointment) {
         data: appointment,
         success: function (data) {
             history.replaceState({}, "", "?x=" + data.a_baselink);
-            document.cookie = data.a_baselink + "=admin";
+            document.cookie = data.a_baselink + "=" + data.a_admin_hash;
             goTo(5);
         },
         error: function (xhr, textStatus, errorThrown) {

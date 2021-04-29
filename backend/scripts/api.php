@@ -15,8 +15,7 @@ spl_autoload_register(function ($class) {
 
 
 //Send mails 
-if(isset($_GET['closing_polls']))
-{
+if (isset($_GET['closing_polls'])) {
 
     $db_con = new DB_get_invites();
 
@@ -26,19 +25,16 @@ if(isset($_GET['closing_polls']))
     $mailer = new Sending_mails();
 
     //Go through each closed poll, get all the associated invites and send the closed mail
-    foreach($polls[0] as $poll)
-    {
-      $invites = $db_con->get_invites($poll['p_e_id']);
-      foreach($invites as $invite)
-        $mailer->send_closed($poll,$invite["a_recipient_email"]);
-    }  
-    foreach($polls[1] as $poll)
-    {
-      $invites = $db_con->get_invites($poll['p_e_id']);
-      foreach($invites as $invite)
-        $mailer->send_almost_closed($poll,$invite["a_recipient_email"]);
+    foreach ($polls[0] as $poll) {
+        $invites = $db_con->get_invites($poll['p_e_id']);
+        foreach ($invites as $invite)
+            $mailer->send_closed($poll, $invite["a_recipient_email"]);
     }
-
+    foreach ($polls[1] as $poll) {
+        $invites = $db_con->get_invites($poll['p_e_id']);
+        foreach ($invites as $invite)
+            $mailer->send_almost_closed($poll, $invite["a_recipient_email"]);
+    }
 }
 
 //Get Appointment data
@@ -66,7 +62,11 @@ if (isset($_POST['a_title'])) {
     if ($hash != NULL) {
         http_response_code(200);
         $hashArray['a_baselink'] =  $hash[0];
+<<<<<<< Updated upstream
         $hashArray['a_admin_hash'] = $hash[1];
+=======
+        $hashArray['a_admin_hash'] =  $hash[1];
+>>>>>>> Stashed changes
         echo json_encode($hashArray); // Eckige Klammern?
     } else {
         http_response_code(500);
@@ -84,7 +84,7 @@ if (isset($_POST['votes'])) {
         //debugLog($hash);
         $hashArray['p_hashbytes'] =  $hash;
         echo json_encode($hashArray); // Eckige Klammern?
-    } else {    
+    } else {
         //debugLog("fail");
         http_response_code(500);
         echo $connector->errorMessage;
@@ -104,6 +104,7 @@ if (isset($_POST["p_hashbytes"])) {
 }
 
 //Delete Poll ONLY POSSIBLE AS ADMIN
+<<<<<<< Updated upstream
 if (isset($_POST["a_admin_hash"]))
 {
     $alter_table = new Db_alter_event();
@@ -116,10 +117,11 @@ if (isset($_POST["a_admin_hash"]))
         http_response_code(500);
         echo json_encode([false]);
     }
+=======
+if (isset($_POST["delete_baselink"])) {
+>>>>>>> Stashed changes
 }
 
 //Create additional timeslot
-if (isset($_POST["timeslot_baselink"]))
-{
-
+if (isset($_POST["timeslot_baselink"])) {
 }

@@ -434,12 +434,21 @@ function ajaxPullAppointment(link: string) {
     });
 }
 
+function getCookieValue(a) {
+    const b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+    return b ? b.pop() : '';
+}
+
 function ajaxDeleteAppointment(link: string) {
-    console.log(link);
+    let deleteData: HashData;
+    deleteData.a_baselink = link;
+    deleteData.a_admin_hash = getCookieValue(link);
+    console.log(deleteData);
 }
 
 interface HashData {
     a_baselink: string;
+    a_admin_hash: string;
 }
 
 function ajaxPushAppointment(appointment: AppointmentData) {
@@ -450,7 +459,7 @@ function ajaxPushAppointment(appointment: AppointmentData) {
         data: appointment,
         success: function(data: HashData) {
             history.replaceState({}, "", "?x=" + data.a_baselink);
-            document.cookie = data.a_baselink + "=admin";
+            document.cookie = data.a_baselink + "=" + data.a_admin_hash;
             goTo(5);
         },
         error: function(xhr, textStatus, errorThrown) {
