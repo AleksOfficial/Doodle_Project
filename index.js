@@ -331,7 +331,7 @@ function handleEmailInput() {
 // send mail invites
 function ajaxSendMail() {
     var lines = emailList.value.split("\n");
-    var baselink = (new URLSearchParams(location.href)).get("x");
+    var baselink = (new URLSearchParams(location.search)).get("x");
     document.querySelector("div.email-list").classList.add("hide");
     emailList.value = "";
     $.ajax({
