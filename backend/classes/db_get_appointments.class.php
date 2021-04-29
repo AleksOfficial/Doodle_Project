@@ -25,7 +25,7 @@ class Db_get_appointments extends Db_con
             }
             $appointment["timeslots"] = $this->get_timeslots_to_appointment($appointment['p_e_id']);
             $appointment["votes"] = $this->get_votes($appointment["a_baselink"]);
-            //$appointment["comments"] = $this->get_comments($appointment["p_e_id"]);
+            $appointment["comments"] = $this->get_comments($appointment["p_e_id"]);
             unset($appointment["p_e_id"]);
             unset($appointment["a_admin_hash"]);
             return $appointment;

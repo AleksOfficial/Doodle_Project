@@ -96,12 +96,17 @@ class Db_create_stuff extends Db_con
             array_push($this->missing_data, "Your content for the comment.");
             $this->error_occured = true;
         }
+        if (!isset($array["a_baselink"]) || empty($array["a_baselink"])) {
+            array_push($this->missing_data, "Baselink of the event.");
+            $this->error_occured = true;
+        }
         if ($this->error_occured) {
             $this->error($this->error_missing, $this->missing_data);
             $this->error_occured = false;
             $this->error_missing = [];
             return false;
         }
+        return true;
 
     }
 
@@ -277,9 +282,11 @@ class Db_create_stuff extends Db_con
     }
     function create_comment($array)
     {
+        
       if($this->check_commentdata($array))
       {
         //Get event id
+        
         $query = "SELECT p_e_id FROM t_events WHERE a_baselink LIKE ?";
         $stmt = $this->pdo->prepare($query);
         $x = $stmt->execute([$array['a_baselink']]);
@@ -289,16 +296,21 @@ class Db_create_stuff extends Db_con
             //check if id exists
             if($e_id)
             {
-                $array["f_e_id"] = $e_id;
+                $array["f_e_id"] = $e_id['p_e_id'];
                 $query = "INSERT INTO t_comments (f_e_id, a_name, a_text, a_date) VALUES (?,?,?,CURRENT_TIMESTAMP)";
                 $comment = $this->convert_to_comment($array);
+                var_dump($comment);
                 $stmt = $this->pdo->prepare($query);
-                $stmt->execute($comment);
-                
+                $x = $stmt->execute($comment);
+                if($x)
+                    return true;
+                else
+                    $this->error($stmt->errorInfo()[2]);
             }
             else
                 $this->error("Error: Event ID not found of baselink. perhaps it was deleted?");
         }
+        return false;
       }
     }
 

@@ -117,7 +117,6 @@ abstract class Db_con
     $comment[] = $array["f_e_id"];
     $comment[] = $array["a_name"];
     $comment[] = $array["a_text"];
-    $comment[] = $array["a_date"];
     return $comment;
   }
 }
