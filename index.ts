@@ -361,7 +361,6 @@ function ajaxPullAppointment(link: string) {
             let headline = document.createElement("h1");
             headline.append(document.createTextNode(data.a_title));
             document.querySelector("div.appointment-content header").prepend(headline);
-            document.querySelector(".appointment-header-tags .appointment-header-name").innerHTML = "Name: " + data.a_title;
             document.querySelector(".appointment-header-tags .appointment-header-location").innerHTML = "Location: " + data.a_location;
             document.querySelector(".appointment-header-tags .appointment-header-description").innerHTML = "Description: " + data.a_description;
             let vote = document.querySelector("div.appointment-content-main-vote");
