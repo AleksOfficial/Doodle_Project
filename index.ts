@@ -440,10 +440,28 @@ function getCookieValue(a) {
 }
 
 function ajaxDeleteAppointment(link: string) {
-    let deleteData: HashData;
+    let deleteData: HashData = {
+        a_admin_hash: "",
+        a_baselink: ""
+    };
     deleteData.a_baselink = link;
     deleteData.a_admin_hash = getCookieValue(link);
-    console.log(deleteData);
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: deleteData,
+        success: function() {
+            location.href = "index.html";
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            if (xhr.status == 500) {
+                alert("Test");
+                let loading = document.querySelector("div.loading-content") as HTMLDivElement;
+                loading.innerHTML = xhr.responseText;
+            }
+        }
+    });
 }
 
 interface HashData {
@@ -514,8 +532,8 @@ function ajaxPushComment() {
             console.log("win");
         },
         error: function(xhr, textStatus, errorThrown) {
+            console.log("lose");
             if (xhr.status == 500) {
-                console.log("lose");
             }
         }
     });

@@ -408,10 +408,28 @@ function getCookieValue(a) {
     return b ? b.pop() : '';
 }
 function ajaxDeleteAppointment(link) {
-    var deleteData;
+    var deleteData = {
+        a_admin_hash: "",
+        a_baselink: ""
+    };
     deleteData.a_baselink = link;
     deleteData.a_admin_hash = getCookieValue(link);
-    console.log(deleteData);
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        dataType: "json",
+        data: deleteData,
+        success: function () {
+            location.href = "index.html";
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            if (xhr.status == 500) {
+                alert("Test");
+                var loading = document.querySelector("div.loading-content");
+                loading.innerHTML = xhr.responseText;
+            }
+        }
+    });
 }
 function ajaxPushAppointment(appointment) {
     $.ajax({
@@ -458,8 +476,8 @@ function ajaxPushComment() {
             console.log("win");
         },
         error: function (xhr, textStatus, errorThrown) {
+            console.log("lose");
             if (xhr.status == 500) {
-                console.log("lose");
             }
         }
     });
