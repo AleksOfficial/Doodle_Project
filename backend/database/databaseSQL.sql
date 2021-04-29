@@ -23,6 +23,7 @@ CREATE TABLE t_events(
   a_creator_name VARCHAR(64) NOT NULL,
   a_creator_email VARCHAR(128) NOT NULL,
   a_baselink VARCHAR (64) NOT NULL UNIQUE,
+  a_admin_hash VARCHAR(64) NOT NULL UNIQUE,
   a_title VARCHAR(100) NOT NULL,
   a_location VARCHAR (64),
   a_description VARCHAR(500)

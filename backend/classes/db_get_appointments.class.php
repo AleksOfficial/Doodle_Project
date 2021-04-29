@@ -25,6 +25,9 @@ class Db_get_appointments extends Db_con
             }
             $appointment["timeslots"] = $this->get_timeslots_to_appointment($appointment['p_e_id']);
             $appointment["votes"] = $this->get_votes($appointment["a_baselink"]);
+            //$appointment["comments"] = $this->get_comments($appointment["p_e_id"]);
+            unset($appointment["p_e_id"]);
+            unset($appointment["a_admin_hash"]);
             return $appointment;
         } else {
             $this->error($stmt->errorInfo()[2]);
@@ -55,6 +58,20 @@ class Db_get_appointments extends Db_con
         $stmt = $this->pdo->prepare($query);
         $x = $stmt->execute([$baselink]);
         if ($x) {
+            return $stmt->fetchAll();
+        } else {
+            $this->error($stmt->errorInfo()[2]);
+            return NULL;
+        }
+    }
+    function get_comments($e_id){
+        $query = "SELECT a_name, a_text, a_date 
+        FROM t_comments 
+        WHERE f_e_id = ? 
+        ORDER BY a_date ASC ";
+        $stmt = $this->pdo->prepare($query);
+        $x = $stmt->execute([$e_id]);
+        if($x) {
             return $stmt->fetchAll();
         } else {
             $this->error($stmt->errorInfo()[2]);

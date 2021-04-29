@@ -86,6 +86,25 @@ class Db_create_stuff extends Db_con
         return true;
     }
 
+    function check_commentdata($array)
+    {
+        if (!isset($array["a_name"]) || empty($array["a_name"])) {
+            array_push($this->missing_data, "Your name for the comment.");
+            $this->error_occured = true;
+        }
+        if (!isset($array["a_text"]) || empty($array["a_text"])) {
+            array_push($this->missing_data, "Your content for the comment.");
+            $this->error_occured = true;
+        }
+        if ($this->error_occured) {
+            $this->error($this->error_missing, $this->missing_data);
+            $this->error_occured = false;
+            $this->error_missing = [];
+            return false;
+        }
+
+    }
+
     function check_votedata($array)
     {
         if ($this->check_timeslotdata($array)) {
@@ -152,6 +171,8 @@ class Db_create_stuff extends Db_con
 
             //All data is set, create Hashbytes
             $array["a_baselink"] = $this->create_hashbytes("a_baselink", "t_events");
+            $array["a_admin_hash"] = $this->create_hashbytes("a_admin_hash", "t_events");
+            
             if ($array["a_baselink"] == NULL)
                 return NULL;
             //Create appointment
@@ -200,20 +221,17 @@ class Db_create_stuff extends Db_con
                     WHERE f_e_id = ?";
                     $stmt = $this->pdo->prepare($query);
                     $x = $stmt->execute([$foreign_key]);
-                    
-                    
+                                        
                     //Send Invite mails
                     if($x)
                         foreach($stmt->fetchAll() as $invite)
                             $mailer->send_invites($invite);
                 }
             }
-            return $array["a_baselink"];
+            return [$array["a_baselink"],$array["a_admin_hash"]];
         }
         return NULL;
     }
-
-
 
     function create_vote($array)
     {
@@ -256,6 +274,32 @@ class Db_create_stuff extends Db_con
                 return NULL;
             }
         }
+    }
+    function create_comment($array)
+    {
+      if($this->check_commentdata($array))
+      {
+        //Get event id
+        $query = "SELECT p_e_id FROM t_events WHERE a_baselink LIKE ?";
+        $stmt = $this->pdo->prepare($query);
+        $x = $stmt->execute([$array['a_baselink']]);
+        if($x)
+        {
+            $e_id = $stmt->fetch();
+            //check if id exists
+            if($e_id)
+            {
+                $array["f_e_id"] = $e_id;
+                $query = "INSERT INTO t_comments (f_e_id, a_name, a_text, a_date) VALUES (?,?,?,CURRENT_TIMESTAMP)";
+                $comment = $this->convert_to_comment($array);
+                $stmt = $this->pdo->prepare($query);
+                $stmt->execute($comment);
+                
+            }
+            else
+                $this->error("Error: Event ID not found of baselink. perhaps it was deleted?");
+        }
+      }
     }
 
     function create_hashbytes($field, $table)

@@ -110,4 +110,13 @@ abstract class Db_con
     }
     return [$hashbytes, $e_id, $time_id, $name];
   }
+  function convert_to_comment($array)
+  {
+    $comment   = [];
+    $comment[] = $array["f_e_id"];
+    $comment[] = $array["a_name"];
+    $comment[] = $array["a_text"];
+    $comment[] = $array["a_date"];
+    return $comment;
+  }
 }
