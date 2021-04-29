@@ -32,12 +32,12 @@ class Sending_mails
 
   public function get_content($poll, $mail_type, &$subject)
   {
-    
+    //var_dump($poll);
     $url_token = "localhost/doodle_project/index.html?x=".$poll['a_baselink'];
     if($mail_type === "invite")
     {
-      $content = file_get_contents("../emails/email_invite.1php");
-      $content = str_replace("{{name}}",$poll["a_creator_name"],$content);
+      $content = file_get_contents("../emails/email_invite.php");
+      $content = str_replace("{{creator_name}}",$poll["a_creator_name"],$content);
       $subject = "Doodle Clone: You received a new Appointment from ".$poll["a_creator_name"]."!";
     }
     if($mail_type === "created"){
@@ -62,31 +62,35 @@ class Sending_mails
 
   //Create Method to check database for running polls and their status; The sending stuff could actually also be implemented by the nodejs stuff...
   //public
-
+  
   
   //Takes in the Poll and the recipient mail, generates and sends a mail to the recipient.
   public function send_invites($array)
   {
-      $mail = $this->generate_mail($array["a_baselink"],"invite",$array["a_creator_name"],$array["a_recipient_email"]);
+    $mail = $this->generate_mail($array,"invite",$array["a_recipient_email"]);
+    //var_dump($mail);
       if($mail != NULL)
-        $mail->send();
+        if(!$mail->send())
+        {
+          var_dump($mail->ErrorInfo);
+        };
+    //var_dump($x);
   }
   public function send_closed($poll,$recipient_email)
   {
-    $mail = $this->generate_mail($poll["a_baselink"],"closed",$recipient_email);
+    $mail = $this->generate_mail($poll,"closed",$recipient_email);
     if($mail != NULL)
       $mail->send();
   }
   public function send_almost_closed($poll,$recipient_email)
   {
-    $mail = $this->generate_mail($poll["a_baselink"],"almost_closed",$recipient_email);
+    $mail = $this->generate_mail($poll,"almost_closed",$recipient_email);
     if($mail != NULL)
       $mail->send();
   }
   public function send_creator($poll)
   {
     $mail = $this->generate_mail($poll,"created",$poll["a_creator_email"]);
-    
     if($mail!=NULL)
       $x = $mail->send();
   }

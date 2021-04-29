@@ -7,7 +7,6 @@ class Db_alter_event extends Db_con
     {
         $this->pdo = $this->connect();
     }
-
     function delete_event($array)
     {
         if(isset($array['a_baselink']) && !empty($array['a_baselink']) && !empty($array['a_admin_hash']))
@@ -31,7 +30,6 @@ class Db_alter_event extends Db_con
                         $this->error($stmt->errorInfo()[2]);
                         return false;
                     }
-
                 }
             }
         }

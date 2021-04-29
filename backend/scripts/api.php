@@ -114,12 +114,36 @@ if (isset($_POST["a_admin_hash"])) {
 
 //Create additional timeslot
 if (isset($_POST["timeslot_baselink"])) {
-
+    $db_ = new Db_create_stuff();
+    $x = $db->create_new_timeslot($_POST);
+    if($x)
+    {
+        http_response_code(200);
+        echo json_encode([true]);
+    } else {
+        http_response_code(500);
+        echo json_encode([false]);
+    }
 }
+//Create Comment
 if(isset($_POST["a_text"]))
 {
     $db = new Db_create_stuff();
     $x = $db->create_comment($_POST);
+    if ($x) {
+        http_response_code(200);
+        echo json_encode([true]);
+    } else {
+        http_response_code(500);
+        echo json_encode([false]);
+    }
+}
+//Send Emails to ppl
+if(isset($_POST['emails']))
+{
+    
+    $db = new Db_create_stuff();
+    $x = $db->create_emails($_POST);
     
     if ($x) {
         http_response_code(200);

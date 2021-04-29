@@ -156,6 +156,26 @@ class Db_create_stuff extends Db_con
             }
         }
     }
+    //Create additional Timeslot
+    public function create_new_timeslot($array)
+    {
+        if($this->check_timeslotdata($array) && isset($array['a_baselink']) && !empty($array['a_baselink']))
+        {
+            $query = "SELECT p_e_id FROM t_events WHERE a_baselink LIKE ?";
+            $stmt = $this->pdo->prepare($query);
+            $x = $stmt->execute([$array['a_baselink']]);
+            if($x)
+            {
+                $e_id = $stmt->fetch();
+                if($e_id)
+                {
+                    $e_id = $e_id['p_e_id'];
+                    return $this->create_timeslot($array,$e_id);
+                }
+            }
+        }
+        return false;
+    }
     //create invites
     function create_invites($email, $foreign_key)
     {
@@ -208,31 +228,7 @@ class Db_create_stuff extends Db_con
             $stmt->execute([$foreign_key]);
             $mailer->send_creator($stmt->fetch());
 
-            //Check if emails are available, if so, create invites on for everyone; all the invites create also accordingly emails, and sends them
-            if (isset($array["emaillist"]))
-            {
-                if (!empty($array["emaillist"]) && (gettype($array["emaillist"]) == "array"))
-                {
-                    foreach ($array["emaillist"] as $email)
-                    {
-                        if (!$this->create_invites($email, $foreign_key))
-                            return NULL;
-                    }
-                    
-                    //Retrieve the inserted invites
-                    $query = "SELECT *
-                    FROM t_invites
-                    INNER JOIN t_events ON t_invites.f_e_id = t_events.p_e_id 
-                    WHERE f_e_id = ?";
-                    $stmt = $this->pdo->prepare($query);
-                    $x = $stmt->execute([$foreign_key]);
-                                        
-                    //Send Invite mails
-                    if($x)
-                        foreach($stmt->fetchAll() as $invite)
-                            $mailer->send_invites($invite);
-                }
-            }
+
             return [$array["a_baselink"],$array["a_admin_hash"]];
         }
         return NULL;
@@ -299,7 +295,7 @@ class Db_create_stuff extends Db_con
                 $array["f_e_id"] = $e_id['p_e_id'];
                 $query = "INSERT INTO t_comments (f_e_id, a_name, a_text, a_date) VALUES (?,?,?,CURRENT_TIMESTAMP)";
                 $comment = $this->convert_to_comment($array);
-                var_dump($comment);
+                //var_dump($comment);
                 $stmt = $this->pdo->prepare($query);
                 $x = $stmt->execute($comment);
                 if($x)
@@ -332,5 +328,78 @@ class Db_create_stuff extends Db_con
             }
         }
         return $hashbytes;
+    }
+    function create_emails($array)
+    {   
+        debugLog("I am inside create_emails");
+        $query = "SELECT p_e_id FROM t_events WHERE a_baselink LIKE ?";
+        $stmt = $this->pdo->prepare($query);
+        $x = $stmt->execute([$array['a_baselink']]);
+        if($x)
+        {
+            debugLog("I executed the p_e_id query sucessfully");
+            debugLog($array['a_baselink']);
+            $e_id = $stmt->fetch();
+            if($e_id)
+                $e_id = $e_id['p_e_id'];
+            else
+                return false;
+        }
+        else
+            return false;
+        debugLog("I found sucessfully the event id");
+        //Create the mailer
+        $mailer = new Sending_mails();
+
+        if (isset($array["emails"]) && !empty($array["emails"]) && (gettype($array["emails"]) == "array"))
+        {
+            debugLog("Now I am checking the mails");
+            $ids = [];
+            foreach ($array["emails"] as $email)
+            {
+                $x = $this->create_invites($email, $e_id);
+                if($x)
+                {
+                    $i_id = $this->pdo->lastInsertId();
+                    var_dump($i_id);
+                    $query = "SELECT *
+                    FROM t_invites 
+                    INNER JOIN t_events ON t_invites.f_e_id = t_events.p_e_id
+                    WHERE p_i_id = ?";
+                    $stmt = $this->pdo->prepare($query);
+                    $x = $stmt->execute([$i_id]);
+                    if($x)
+                    {
+                        $y = $stmt->fetch();
+                        echo"<br>".var_dump($y);
+                        
+                        if($y)
+                            $mailer->send_invites($y);
+                    }
+                }
+            }
+            /*
+            //Retrieve the inserted invites
+            $query = "SELECT *
+            FROM t_invites
+            INNER JOIN t_events ON t_invites.f_e_id = t_events.p_e_id 
+            WHERE f_e_id = ?";
+            $stmt = $this->pdo->prepare($query);
+            $x = $stmt->execute([$e_id]);
+            */
+            //Send Invite mails
+            if($x)
+            {
+                foreach($stmt->fetchAll() as $invite)
+                {
+                    //var_dump($invite);
+                    $mailer->send_invites($invite);
+
+                }
+            }
+            else
+                return false;
+        }
+        return true;
     }
 }
