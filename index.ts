@@ -534,7 +534,7 @@ function ajaxPushComment() {
         url: "backend/scripts/api.php",
         dataType: "json",
         data: commentData,
-        success: function(data) {
+        success: function() {
             location.reload();
         },
         error: function(xhr, textStatus, errorThrown) {
