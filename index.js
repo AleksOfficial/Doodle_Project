@@ -476,11 +476,11 @@ function ajaxPushComment() {
         dataType: "json",
         data: commentData,
         success: function (data) {
-            console.log("win");
+            location.reload();
         },
         error: function (xhr, textStatus, errorThrown) {
-            console.log("lose");
             if (xhr.status == 500) {
+                console.log("lose");
             }
         }
     });
