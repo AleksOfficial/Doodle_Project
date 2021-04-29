@@ -221,7 +221,8 @@ function handleCreatorInput() {
 }
 commentData = {
     a_name: "",
-    a_comment: ""
+    a_comment: "",
+    a_baselink: ""
 };
 function handleCommentInput() {
     commentData.a_name = commentNameInput.value;
@@ -467,6 +468,8 @@ function ajaxPushVotes(votes) {
     });
 }
 function ajaxPushComment() {
+    var params = new URLSearchParams(location.search);
+    commentData.a_baselink = params.get("x");
     $.ajax({
         type: "post",
         url: "backend/scripts/api.php",

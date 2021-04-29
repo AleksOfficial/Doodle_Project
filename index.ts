@@ -247,11 +247,13 @@ function handleCreatorInput() {
 interface CommentData {
     a_name: string;
     a_comment: string;
+    a_baselink: string;
 }
 
 commentData = {
     a_name: "",
-    a_comment: ""
+    a_comment: "",
+    a_baselink: ""
 }
 
 function handleCommentInput() {
@@ -523,6 +525,8 @@ function ajaxPushVotes(votes: Votes) {
 }
 
 function ajaxPushComment() {
+    let params = new URLSearchParams(location.search);
+    commentData.a_baselink = params.get("x");
     $.ajax({
         type: "post",
         url: "backend/scripts/api.php",
