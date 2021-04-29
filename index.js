@@ -344,7 +344,7 @@ function ajaxPullAppointment(link) {
                 document.querySelector("div.appointment-content-main-link").append(deleteDiv);
             }
             linkInput.value = location.href;
-            if (new Date(data.a_end_date) >= new Date()) {
+            if (new Date(data.a_end_date) < new Date()) {
                 document.querySelector("div.appointment-content-main-submit").classList.add("hide");
             }
             var _loop_1 = function (i) {
@@ -354,7 +354,7 @@ function ajaxPullAppointment(link) {
                 start.append(document.createTextNode(data.timeslots[i].a_start.toString()));
                 var end = timeslot.children[1];
                 end.append(document.createTextNode(data.timeslots[i].a_end.toString()));
-                if (new Date(data.a_end_date) < new Date()) {
+                if (new Date(data.a_end_date) >= new Date()) {
                     var checkbox = document.createElement("input");
                     checkbox.setAttribute("type", "checkbox");
                     checkbox.addEventListener("click", voteListener);
