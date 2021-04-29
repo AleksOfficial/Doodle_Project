@@ -31,6 +31,9 @@ var commentTextArea;
 var commentButton;
 var commentData;
 var commentGiven = false;
+var emailList;
+var emailButton;
+var emailListGiven = false;
 votes = {
     a_baselink: "",
     votes: []
@@ -130,6 +133,7 @@ function goTo(page) {
         clearInterval(intervalFunction);
         intervalFunction = setInterval(handleVoteInput, 100);
         setInterval(handleCommentInput, 100);
+        setInterval(handleEmailInput, 100);
         mainBox.classList.remove("main-box-large");
         mainBox.classList.add("main-box-full");
         activeButton = document.querySelector("div.appointment-content-main-submit button");
@@ -295,6 +299,41 @@ function handleOptionInput() {
         nameAndEndTimeGiven = false;
     }
 }
+function handleEmailInput() {
+    if (emailList.value != "" && !emailListGiven) {
+        emailButton.addEventListener("click", ajaxSendMail);
+        emailButton.classList.add("button-clickable");
+        emailButton.classList.remove("button-unclickable");
+        emailListGiven = true;
+    }
+    else if (emailList.value == "" && emailListGiven) {
+        emailButton.removeEventListener("click", ajaxSendMail);
+        emailButton.classList.add("button-unclickable");
+        emailButton.classList.remove("button-clickable");
+        emailListGiven = false;
+    }
+}
+function ajaxSendMail() {
+    var lines = emailList.value.split("\n");
+    var baselink = (new URLSearchParams(location.href)).get("x");
+    document.querySelector("div.email-list").classList.add("hide");
+    emailList.value = "";
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        data: { a_baselink: baselink, emails: lines },
+        success: function () {
+            alert("emails sent!");
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            if (xhr.status == 500) {
+                alert("Error sending Mail");
+                var loading = document.querySelector("div.loading-content");
+                loading.innerHTML = xhr.responseText;
+            }
+        }
+    });
+}
 function removeCookie(votedHash) {
     document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
     ajaxDeleteVotes(votedHash);
@@ -305,9 +344,8 @@ function ajaxDeleteVotes(votedHash) {
     $.ajax({
         type: "post",
         url: "backend/scripts/api.php",
-        dataType: "json",
         data: { p_hashbytes: votedHash },
-        success: function (data) {
+        success: function () {
             location.reload();
         },
         error: function (xhr, textStatus, errorThrown) {
@@ -398,6 +436,19 @@ function ajaxPullAppointment(link) {
             for (var i = 0; i < data.timeslots.length; i++) {
                 _loop_1(i);
             }
+            var commentSection = document.querySelector("div.appointment-content-main-comment-insert");
+            for (var _i = 0, _a = data.comments; _i < _a.length; _i++) {
+                var comment = _a[_i];
+                var commentDiv = document.createElement("div");
+                commentDiv.classList.add("comment");
+                var nameDiv = document.createElement("div");
+                nameDiv.append(document.createTextNode("Name: " + comment.a_name));
+                var commentDivDiv = document.createElement("div");
+                commentDivDiv.append(document.createTextNode(comment.a_text));
+                commentDiv.append(nameDiv);
+                commentDiv.append(commentDivDiv);
+                commentSection.append(commentDiv);
+            }
         },
         error: function (xhr, textStatus, errorThrown) {
             var appointment = document.querySelector("div.appointment-content-main");
@@ -419,7 +470,6 @@ function ajaxDeleteAppointment(link) {
     $.ajax({
         type: "post",
         url: "backend/scripts/api.php",
-        dataType: "json",
         data: deleteData,
         success: function () {
             location.href = "index.html";
@@ -474,12 +524,12 @@ function ajaxPushComment() {
     $.ajax({
         type: "post",
         url: "backend/scripts/api.php",
-        dataType: "json",
         data: commentData,
         success: function () {
             location.reload();
         },
         error: function (xhr, textStatus, errorThrown) {
+            console.log(xhr.status);
             if (xhr.status == 500) {
                 console.log("lose");
             }
@@ -502,6 +552,12 @@ window.onload = function () {
     activeButton = document.querySelector("div.create-new-appointment-content button");
     document.querySelector("div.calendar-bottom-buttons .button-back").addEventListener("click", function () { goTo(1); });
     document.querySelector("div.creator-bottom-buttons .button-back").addEventListener("click", function () { goTo(2); });
+    document.querySelector("button.email-button").addEventListener("click", function () {
+        document.querySelector("div.email-list").classList.remove("hide");
+    });
+    document.querySelector("button.cancel-button").addEventListener("click", function () {
+        document.querySelector("div.email-list").classList.add("hide");
+    });
     nameInput = document.querySelector("div.create-new-appointment-content input");
     locationInput = document.querySelector("div.options-content input[name = 'location']");
     descriptionInput = document.querySelector("div.options-content input[name = 'description']");
@@ -511,6 +567,8 @@ window.onload = function () {
     commentNameInput = document.querySelector("input.appointment-content-main-comments-name-input");
     commentTextArea = document.querySelector("textarea.appointment-content-main-comments-textarea");
     commentButton = document.querySelector("div.appointment-content-main-comments button");
+    emailList = document.querySelector("div.email-list textarea");
+    emailButton = document.querySelector("button.email-invite-button");
     document.querySelector("div.appointment-content-main-link button").addEventListener("click", function () {
         var inputField = document.querySelector("div.appointment-content-main-link input");
         inputField.select();

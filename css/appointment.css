@@ -55,11 +55,14 @@
 }
 
 .appointment-content-main-comments textarea {
+  font-family: Antonio;
   width: 90%;
   max-width: 900px;
   height: 300px;
   resize: none;
   font-size: 2em;
+  border-radius: 10px;
+  outline: none;
 }
 
 .appointment-content-main-comments div {
@@ -68,7 +71,21 @@
 
 .appointment-content-main-comment-insert {
   width: 90%;
-  max-width: 900px;
+  margin: 0% 5% !important;
+  text-align: left;
+}
+
+.appointment-content-main-comment-insert .comment {
+  border: 1px;
+  border-radius: 10px;
+  border-style: solid;
+}
+
+@media (min-width: 800px) {
+  .appointment-content-main-comment-insert {
+    width: 60%;
+    margin: 0% 20% !important;
+  }
 }
 
 .appointment-header-tags {
@@ -80,4 +97,23 @@
 
 .appointment-header-tags div {
   padding-bottom: 20px;
+}
+
+.email-list {
+  width: 100%;
+  padding: 5%;
+  background-color: rgb(139, 139, 139);
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.email-list textarea {
+  font-family: Antonio;
+  width: 100%;
+  margin: 20px 0;
+  resize: none;
+  font-size: 2em;
+  border-radius: 10px;
+  outline: none;
+  height: 200px;
 }

@@ -50,6 +50,9 @@ var commentTextArea: HTMLTextAreaElement;
 var commentButton: HTMLButtonElement;
 var commentData: CommentData;
 var commentGiven: boolean = false;
+var emailList: HTMLTextAreaElement;
+var emailButton: HTMLButtonElement;
+var emailListGiven: boolean = false;
 
 votes = {
     a_baselink : "",
@@ -152,11 +155,13 @@ function goTo(page: number) {
         clearInterval(intervalFunction);
         intervalFunction = setInterval(handleVoteInput, 100);
         setInterval(handleCommentInput, 100);
+        setInterval(handleEmailInput, 100);
         mainBox.classList.remove("main-box-large");
         mainBox.classList.add("main-box-full");
         activeButton = document.querySelector("div.appointment-content-main-submit button");
         let params = new URLSearchParams(location.search);
         ajaxPullAppointment(params.get("x"));
+        (document.querySelector("div.email-list textarea") as HTMLTextAreaElement).value = "";
     }
 }
 
@@ -329,6 +334,42 @@ function handleOptionInput() {
     }
 }
 
+function handleEmailInput() {
+    if(emailList.value != "" && !emailListGiven) {
+        emailButton.addEventListener("click", ajaxSendMail);
+        emailButton.classList.add("button-clickable");
+        emailButton.classList.remove("button-unclickable");
+        emailListGiven = true;
+    } else if (emailList.value == "" && emailListGiven) {
+        emailButton.removeEventListener("click", ajaxSendMail);
+        emailButton.classList.add("button-unclickable");
+        emailButton.classList.remove("button-clickable");
+        emailListGiven = false;
+    }
+}
+
+function ajaxSendMail() {
+    let lines = emailList.value.split("\n");
+    let baselink = (new URLSearchParams(location.href)).get("x");
+    document.querySelector("div.email-list").classList.add("hide");
+    emailList.value = "";
+    $.ajax({
+        type: "post",
+        url: "backend/scripts/api.php",
+        data: {a_baselink: baselink, emails: lines},
+        success: function() {
+            alert("emails sent!");
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            if (xhr.status == 500) {
+                alert("Error sending Mail");
+                let loading = document.querySelector("div.loading-content") as HTMLDivElement;
+                loading.innerHTML = xhr.responseText;
+            }
+        }
+    });
+}
+
 function removeCookie(votedHash: string) {
     document.cookie = votedHash + "=voted; expires=" + (new Date()).toUTCString();
     ajaxDeleteVotes(votedHash);
@@ -340,9 +381,8 @@ function ajaxDeleteVotes(votedHash: string) {
     $.ajax({
         type: "post",
         url: "backend/scripts/api.php",
-        dataType: "json",
         data: {p_hashbytes: votedHash},
-        success: function(data) {
+        success: function() {
             location.reload();
         },
         error: function(xhr, textStatus, errorThrown) {
@@ -430,6 +470,18 @@ function ajaxPullAppointment(link: string) {
                 countDiv.append(document.createTextNode("Votes: " + count.toString()))
                 vote.append(timeslot);
             }
+            let commentSection = document.querySelector("div.appointment-content-main-comment-insert") as HTMLDivElement;
+            for (let comment of data.comments) {
+                let commentDiv = document.createElement("div") as HTMLDivElement;
+                commentDiv.classList.add("comment");
+                let nameDiv = document.createElement("div") as HTMLDivElement;
+                nameDiv.append(document.createTextNode("Name: " + comment.a_name));
+                let commentDivDiv = document.createElement("div") as HTMLDivElement;
+                commentDivDiv.append(document.createTextNode(comment.a_text));
+                commentDiv.append(nameDiv);
+                commentDiv.append(commentDivDiv);
+                commentSection.append(commentDiv);
+            }
         },
         error: function(xhr, textStatus, errorThrown) {
             let appointment = document.querySelector("div.appointment-content-main") as HTMLDivElement;
@@ -453,7 +505,6 @@ function ajaxDeleteAppointment(link: string) {
     $.ajax({
         type: "post",
         url: "backend/scripts/api.php",
-        dataType: "json",
         data: deleteData,
         success: function() {
             location.href = "index.html";
@@ -532,12 +583,12 @@ function ajaxPushComment() {
     $.ajax({
         type: "post",
         url: "backend/scripts/api.php",
-        dataType: "json",
         data: commentData,
         success: function() {
             location.reload();
         },
         error: function(xhr, textStatus, errorThrown) {
+            console.log(xhr.status);
             if (xhr.status == 500) {
                 console.log("lose");
             }
@@ -561,6 +612,12 @@ window.onload = () => {
     activeButton = document.querySelector("div.create-new-appointment-content button") as HTMLButtonElement;
     document.querySelector("div.calendar-bottom-buttons .button-back").addEventListener("click", () => {goTo(1)});
     document.querySelector("div.creator-bottom-buttons .button-back").addEventListener("click", () => {goTo(2)});
+    document.querySelector("button.email-button").addEventListener("click", () => {
+        document.querySelector("div.email-list").classList.remove("hide");
+    });
+    document.querySelector("button.cancel-button").addEventListener("click", () => {
+        document.querySelector("div.email-list").classList.add("hide");
+    });
     nameInput = document.querySelector("div.create-new-appointment-content input") as HTMLInputElement;
     locationInput = document.querySelector("div.options-content input[name = 'location']") as HTMLInputElement;
     descriptionInput = document.querySelector("div.options-content input[name = 'description']") as HTMLInputElement;
@@ -570,6 +627,8 @@ window.onload = () => {
     commentNameInput = document.querySelector("input.appointment-content-main-comments-name-input") as HTMLInputElement;
     commentTextArea = document.querySelector("textarea.appointment-content-main-comments-textarea") as HTMLTextAreaElement;
     commentButton = document.querySelector("div.appointment-content-main-comments button") as HTMLButtonElement;
+    emailList = document.querySelector("div.email-list textarea") as HTMLTextAreaElement;
+    emailButton = document.querySelector("button.email-invite-button") as HTMLButtonElement;
     document.querySelector("div.appointment-content-main-link button").addEventListener("click", function() {
         let inputField = document.querySelector("div.appointment-content-main-link input") as HTMLInputElement;
         inputField.select();
