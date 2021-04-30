@@ -3,13 +3,21 @@
 abstract class Db_con
 {
   private $host = "localhost";
-  private $user = "hello_world";
-  private $pwd = "123";
-  private $dbName = "doodle_project";
+  private $user;
+  private $pwd;
+  private $dbName;
   protected $pdo;
 
   protected function connect()
   {
+    //construct username, pwd, and databasename
+    $file = fopen("../database.config",'r',true);
+    $this->user = rtrim(fgets($file));
+    $this->pwd = rtrim(fgets($file));
+    $this->dbName= rtrim(fgets($file));
+    fclose($file);
+    //svar_dump($this);
+    //setup pdo
     $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbName;
     $pdo = new PDO($dsn, $this->user, $this->pwd);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
