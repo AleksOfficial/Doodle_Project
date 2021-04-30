@@ -335,6 +335,7 @@ function handleVoteInput() {
 // button only clickable if both name and end date are entered, location and description optional (page 1)
 function handleOptionInput() {
     collectedData.a_end_date = endTimeInput.value + " " + endTimeHourInput.value;
+    collectedData.a_title = nameInput.value;
     if(nameInput.value != "" && endTimeInput.value != "" && !nameAndEndTimeGiven) {
         activeButton.addEventListener("click", listener);
         activeButton.classList.add("button-clickable");
