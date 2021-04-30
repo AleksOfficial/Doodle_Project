@@ -453,7 +453,7 @@
                     <td class="content-cell">
                       <div class="f-fallback">
                         <h1>Hi again 👋</h1>
-                        <p> A poll you have been invited to, ends in five minutes and you haven't voted yet! If you want your voice be heard, be quick! 🗳️</p>
+                        <p> A poll you have been invited to, has ended! View the result below! 🗳️</p>
                         <!-- Action -->
                         <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                           <tr>
@@ -472,7 +472,7 @@
                         </table>
                         <p>The Poll ended on: <strong>{{a_end_date}}</strong> .</p>
                         <p>Thank you for using our tools, you are aweosome!
-                          <br>- Töhe Doodle clone team</p>
+                          <br>- The Doodle clone team</p>
                         <!-- Sub copy -->
                         <table class="body-sub" role="presentation">
                           <tr>

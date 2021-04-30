@@ -21,6 +21,7 @@ if (isset($_GET['closing_polls'])) {
 
     //Query DB - Look for Polls that are ending within 5 minutes and which ended exactly at that minute, retrieve title/e_id/baselink
     $polls = $db_con->get_closing_polls();
+    var_dump($polls);
 
     $mailer = new Sending_mails();
 
