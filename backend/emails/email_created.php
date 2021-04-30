@@ -432,7 +432,7 @@
 
   </head>
   <body>
-    <span class="preheader">Use this link to reset your password. The link is only valid for 24 hours.</span>
+    <span class="preheader">Use this link to access the appointment you created.</span>
     <table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
       <tr>
         <td align="center">
@@ -440,7 +440,7 @@
             <tr>
               <td class="email-masthead">
                 <a href="localhost/webtech/webdev_project/index.php" class="f-fallback email-masthead_name">
-                RIFT
+                Doodle Clone
               </a>
               </td>
             </tr>

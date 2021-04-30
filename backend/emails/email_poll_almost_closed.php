@@ -432,7 +432,7 @@
 
   </head>
   <body>
-    <span class="preheader">Use this link to reset your password. The link is only valid for 24 hours.</span>
+    <span class="preheader">Access the poll with the link below.</span>
     <table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
       <tr>
         <td align="center">
@@ -493,11 +493,9 @@
                 <table class="email-footer" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
                   <tr>
                     <td class="content-cell" align="center">
-                      <p class="f-fallback sub align-center">&copy; 2021 RIFT. All rights reserved.</p>
+                      <p class="f-fallback sub align-center">&copy; 2021 Doodle Clone. All rights reserved.</p>
                       <p class="f-fallback sub align-center">
-                        [RIFT Social Media, GmbH]
-                        <br>Höchstädtplatz 6.
-                        <br>Wien, 1200
+
                       </p>
                     </td>
                   </tr>
